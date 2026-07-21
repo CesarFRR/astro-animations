@@ -1,0 +1,143 @@
+---
+export interface Props {
+  animationId: string;
+}
+
+const { animationId } = Astro.props;
+---
+
+<div class="canvas-container" id={`canvas-${animationId}`}>
+  <canvas id={`scene-${animationId}`}></canvas>
+</div>
+
+<div class="loading-screen" id={`loading-${animationId}`}>
+  <div class="loading-spinner"></div>
+  <p class="loading-text">Cargando animación...</p>
+</div>
+
+<script>
+  import * as THREE from 'three';
+  
+  export class Canvas3D {
+    private scene: THREE.Scene;
+    private camera: THREE.PerspectiveCamera;
+    private renderer: THREE.WebGLRenderer;
+    private canvas: HTMLCanvasElement;
+    private animationId: string;
+    private animationFrameId: number | null = null;
+    private clock: THREE.Clock;
+    
+    constructor(containerId: string, animationId: string) {
+      this.animationId = animationId;
+      this.canvas = document.getElementById(`scene-${animationId}`) as HTMLCanvasElement;
+      
+      if (!this.canvas) {
+        throw new Error(`Canvas not found for animation: ${animationId}`);
+      }
+      
+      // Scene
+      this.scene = new THREE.Scene();
+      
+      // Camera
+      this.camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      this.camera.position.z = 5;
+      
+      // Renderer
+      this.renderer = new THREE.WebGLRenderer({
+        canvas: this.canvas,
+        antialias: true,
+        alpha: true
+      });
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      
+      // Clock
+      this.clock = new THREE.Clock();
+      
+      // Handle resize
+      window.addEventListener('resize', () => this.onResize());
+    }
+    
+    protected addLight() {
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      this.scene.add(ambientLight);
+      
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(5, 5, 5);
+      this.scene.add(directionalLight);
+    }
+    
+    protected onResize() {
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    
+    protected animate(callback?: (time: number) => void) {
+      this.animationFrameId = requestAnimationFrame(() => this.animate(callback));
+      
+      const time = this.clock.getElapsedTime();
+      callback?.(time);
+      
+      this.renderer.render(this.scene, this.camera);
+    }
+    
+    public start(callback?: (time: number) => void) {
+      this.animate(callback);
+    }
+    
+    public stop() {
+      if (this.animationFrameId !== null) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = null;
+      }
+    }
+    
+    public getScene() {
+      return this.scene;
+    }
+    
+    public getCamera() {
+      return this.camera;
+    }
+    
+    public getRenderer() {
+      return this.renderer;
+    }
+    
+    public dispose() {
+      this.stop();
+      this.renderer.dispose();
+    }
+  }
+  
+  // Initialize on DOM ready
+  document.addEventListener('DOMContentLoaded', () => {
+    // Hide loading screen after a short delay
+    setTimeout(() => {
+      document.querySelectorAll('.loading-screen').forEach(el => {
+        el.classList.add('hidden');
+      });
+    }, 500);
+  });
+</script>
+
+<style>
+  .canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  
+  canvas {
+    display: block;
+  }
+</style>

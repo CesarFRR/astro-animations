@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { animations, categories } from '../data/animations';
+---
+
+<Layout title="Catálogo de Animaciones">
+  <main>
+    <section class="hero">
+      <h1>Astro Animations</h1>
+      <p>Explora el universo a través de animaciones 3D interactivas. Desde supernovas hasta agujeros negros, vive la astronomía como nunca antes.</p>
+    </section>
+
+    <section class="filters">
+      {categories.map(cat => (
+        <button class="filter-btn" data-category={cat.id}>
+          <span class="filter-icon">{cat.icon}</span>
+          <span class="filter-name">{cat.name}</span>
+        </button>
+      ))}
+    </section>
+
+    <section class="animation-grid">
+      {animations.map(anim => (
+        <a href={`/astro-animations/animations/${anim.id}`} class="animation-card">
+          <div class="animation-card-image" style={`background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card))`}></div>
+          <div class="animation-card-content">
+            <h3>{anim.title}</h3>
+            <p>{anim.description}</p>
+            <div class="animation-card-tags">
+              {anim.tags.map(tag => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+          </div>
+        </a>
+      ))}
+    </section>
+  </main>
+
+  <script>
+    // Filter functionality
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+        
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        document.querySelectorAll('.animation-card').forEach(card => {
+          const htmlCard = card as HTMLElement;
+          if (category === 'todas') {
+            htmlCard.style.display = '';
+          } else {
+            // In a real implementation, you'd check the card's category
+            htmlCard.style.display = '';
+          }
+        });
+      });
+    });
+  </script>
+
+  <style>
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 100px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: var(--text-primary);
+    }
+
+    .filter-icon {
+      font-size: 1rem;
+    }
+
+    .filter-name {
+      font-size: 0.875rem;
+    }
+  </style>
+</Layout>
