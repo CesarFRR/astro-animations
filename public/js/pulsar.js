@@ -29,19 +29,23 @@ controls.autoRotate = false;
 controls.target.set(0, 0, 0);
 
 // ============================================
-// CONFIGURACIÓN DEL PÚLSAR
+// CONFIGURACIÓN DEL PÚLSAR - DATOS REALES
 // ============================================
 
 const PULSAR_CONFIG = {
-  neutronStarRadius: 1.2,
+  // PSR B0833-45 (Púlsar de Vela)
+  rotationPeriod: 0.011195,    // 11.195 ms por rotación
+  frequency: 89.33,            // 89.33 Hz (rotaciones/segundo)
+  rotationSpeed: Math.PI * 2 * 89.33,  // ~561.3 radianes/segundo
+  
+  neutronStarRadius: 1.2,      // Radio visual (proporcional a ~10km real)
   beamLength: 20,
   beamRadius: 0.4,
-  beamCurve: 3.5,  // Cuánto se curva el haz
+  beamCurve: 3.5,
 };
 
 let playing = true;
-let speed = 1;
-let soundEnabled = false;
+let speed = 1;  // 1x = velocidad real
 let rotationAngle = 0;
 
 // ============================================
@@ -538,12 +542,12 @@ function animate() {
   if (playing) {
     elapsedTime += dt * speed;
 
-    // Rotación del púlsar
-    rotationAngle += dt * speed * Math.PI * 2;
+    // Rotación del púlsar - VELOCIDAD REAL (89.33 Hz)
+    rotationAngle += dt * speed * PULSAR_CONFIG.rotationSpeed;
     pulsarGroup.rotation.y = rotationAngle;
 
-    // Efecto de pulso en el brillo
-    const pulsePhase = (elapsedTime * 89.33) % 1;
+    // Efecto de pulso en el brillo - sincronizado con rotación real
+    const pulsePhase = (elapsedTime * PULSAR_CONFIG.frequency) % 1;
     const pulseIntensity = 0.8 + 0.2 * Math.sin(pulsePhase * Math.PI * 2);
     glowMaterial.opacity = 0.25 * pulseIntensity;
     coreMaterial.opacity = 0.9 + 0.1 * pulseIntensity;
