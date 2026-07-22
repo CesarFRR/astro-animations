@@ -41,6 +41,16 @@ export const animations: Animation[] = [
     duration: '2-4 min'
   },
   {
+    id: 'crab-pulsar',
+    title: 'Púlsar del Cangrejo (PSR B0531+21)',
+    description: 'El corazón de la Nebulosa del Cangrejo, una estrella de neutrones que gira 30 veces por segundo, nacida de la supernova SN 1054.',
+    category: 'pulsar',
+    tags: ['Estrella de neutrones', 'Resto de supernova', 'Audio 3D sincronizado'],
+    thumbnail: '/thumbnails/crab-pulsar.jpg',
+    difficulty: 'intermedio',
+    duration: '∞'
+  },
+  {
     id: 'pulsar-vela',
     title: 'Púlsar de Vela (PSR B0833-45)',
     description: 'Una estrella de neutrones girando 89 veces por segundo, emitiendo pulsos de radio y rayos gamma como un faro cósmico.',
