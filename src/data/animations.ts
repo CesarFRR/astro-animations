@@ -39,6 +39,16 @@ export const animations: Animation[] = [
     thumbnail: '/thumbnails/enana-blanca.jpg',
     difficulty: 'basico',
     duration: '2-4 min'
+  },
+  {
+    id: 'pulsar-vela',
+    title: 'Púlsar de Vela (PSR B0833-45)',
+    description: 'Una estrella de neutrones girando 89 veces por segundo, emitiendo pulsos de radio y rayos gamma como un faro cósmico.',
+    category: 'pulsar',
+    tags: ['Estrella de neutrones', 'Rotación extrema', 'Audio sincronizado'],
+    thumbnail: '/thumbnails/pulsar-vela.jpg',
+    difficulty: 'intermedio',
+    duration: '∞'
   }
 ];
 
