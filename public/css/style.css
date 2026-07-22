@@ -313,6 +313,17 @@ html, body {
   box-shadow: 0 0 14px rgba(79,172,254,0.35);
 }
 
+.ctrl-btn.muted {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+.ctrl-btn.muted:hover {
+  background: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+}
+
 .speed-control {
   display: flex;
   align-items: center;
