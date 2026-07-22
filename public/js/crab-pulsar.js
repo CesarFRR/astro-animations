@@ -74,12 +74,12 @@ const coreMaterial = new THREE.MeshBasicMaterial({
 const core = new THREE.Mesh(coreGeometry, coreMaterial);
 pulsarGroup.add(core);
 
-// Disco ecuatorial
-const ringGeo = new THREE.RingGeometry(1.5, 2.2, 80);
+// Disco ecuatorial fijo
+const ringGeo = new THREE.RingGeometry(2.5, 4.5, 80);
 const ringMat = new THREE.MeshBasicMaterial({
   color: 0x88bbff,
   transparent: true,
-  opacity: 0.25,
+  opacity: 0.18,
   blending: THREE.AdditiveBlending,
   side: THREE.DoubleSide,
   depthWrite: false,
@@ -88,11 +88,11 @@ const ring = new THREE.Mesh(ringGeo, ringMat);
 ring.rotation.x = -Math.PI / 2;
 pulsarGroup.add(ring);
 
-const ringGlowGeo = new THREE.RingGeometry(1.3, 2.6, 80);
+const ringGlowGeo = new THREE.RingGeometry(2.2, 5.0, 80);
 const ringGlowMat = new THREE.MeshBasicMaterial({
   color: 0x6699cc,
   transparent: true,
-  opacity: 0.06,
+  opacity: 0.04,
   blending: THREE.AdditiveBlending,
   side: THREE.DoubleSide,
   depthWrite: false,
@@ -211,16 +211,16 @@ function createJetParticles(direction = 1) {
     colors[i * 3] = rgb.r;
     colors[i * 3 + 1] = rgb.g;
     colors[i * 3 + 2] = rgb.b;
-    sizes[i] = 0.05 + t * 0.8 + Math.random() * 0.3;
+    sizes[i] = 0.02 + t * 0.15 + Math.random() * 0.08;
   }
   geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   geo.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
   const mat = new THREE.PointsMaterial({
-    size: 0.5,
+    size: 0.2,
     vertexColors: true,
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.5,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     sizeAttenuation: true,
@@ -473,10 +473,8 @@ function animate() {
     coreBeamNorth.material.opacity = 0.75 + 0.25 * sweep;
     coreBeamSouth.material.opacity = 0.75 + 0.25 * sweep;
 
-    ring.rotation.y += dt * speed * 0.08;
-    ringGlow.rotation.y += dt * speed * 0.08;
-    ring.material.opacity = 0.18 + 0.12 * pulse;
-    ringGlow.material.opacity = 0.04 + 0.04 * pulse;
+    ring.material.opacity = 0.12 + 0.08 * pulse;
+    ringGlow.material.opacity = 0.03 + 0.02 * pulse;
 
     function updateJet(jet, dir) {
       const pos = jet.mesh.geometry.attributes.position.array;
