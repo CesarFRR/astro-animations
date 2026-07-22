@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Púlsar del Cangrejo</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-</head>
-<body>
-  <canvas id="space-canvas"></canvas>
-
+---
+import AnimationLayout from '../../layouts/AnimationLayout.astro';
+---
+<AnimationLayout
+  title="Púlsar del Cangrejo (PSR B0531+21)"
+  subtitle="Estrella de neutrones · Rotación: 33.112 ms · Distancia: 6,500 años luz"
+  scriptSrc="js/pulsar/crab.js"
+>
   <header class="top-bar">
     <h1>Púlsar del Cangrejo (PSR B0531+21)</h1>
     <div class="subtitle">Estrella de neutrones · Rotación: 33.112 ms · Distancia: 6,500 años luz</div>
-    <a class="nav-link" href="index.html">← Catálogo</a>
+    <a class="nav-link" href="/astro-animations/">← Catálogo</a>
   </header>
 
   <section class="phase-panel">
@@ -69,7 +58,4 @@
       </select>
     </div>
   </section>
-
-  <script type="module" src="js/crab-pulsar.js"></script>
-</body>
-</html>
+</AnimationLayout>

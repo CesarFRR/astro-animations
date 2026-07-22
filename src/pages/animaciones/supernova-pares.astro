@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Supernova de Inestabilidad de Pares</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-</head>
-<body>
-  <canvas id="space-canvas"></canvas>
-
+---
+import AnimationLayout from '../../layouts/AnimationLayout.astro';
+---
+<AnimationLayout
+  title="Supernova de Inestabilidad de Pares"
+  subtitle="Masa: 130–250 M☉ · Metalicidad baja · Destrucción total sin remanente"
+  scriptSrc="js/main.js"
+>
   <header class="top-bar">
     <h1>Supernova de Inestabilidad de Pares</h1>
     <div class="subtitle">Masa: 130–250 M☉ · Metalicidad baja · Destrucción total sin remanente</div>
-    <a class="nav-link" href="enana-blanca.html">De gigante roja a enana blanca →</a>
+    <a class="nav-link" href="/astro-animations/animaciones/enana-blanca/">De gigante roja a enana blanca →</a>
   </header>
 
   <section class="phase-panel">
@@ -97,7 +86,4 @@
       </div>
     </div>
   </section>
-
-  <script type="module" src="js/main.js"></script>
-</body>
-</html>
+</AnimationLayout>

@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://astronomia-para-todos.github.io',
+  site: 'https://cesarrfr.github.io',
   base: '/astro-animations',
   output: 'static',
   vite: {

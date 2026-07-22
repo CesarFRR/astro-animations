@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>De Gigante Roja a Enana Blanca</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-</head>
-<body>
-  <canvas id="space-canvas"></canvas>
-
+---
+import AnimationLayout from '../../layouts/AnimationLayout.astro';
+---
+<AnimationLayout
+  title="De Gigante Roja a Enana Blanca"
+  subtitle="Estrella de ~1 M☉ · Muerte tranquila · El núcleo sobrevive como enana blanca"
+  scriptSrc="js/wb/main-wb.js"
+>
   <header class="top-bar">
     <h1>De Gigante Roja a Enana Blanca</h1>
     <div class="subtitle">Estrella de ~1 M☉ · Muerte tranquila · El núcleo sobrevive como enana blanca</div>
-    <a class="nav-link" href="agujero-negro.html">Supernova a agujero negro →</a>
+    <a class="nav-link" href="/astro-animations/animaciones/agujero-negro/">Supernova a agujero negro →</a>
   </header>
 
   <section class="phase-panel">
@@ -97,7 +86,4 @@
       </div>
     </div>
   </section>
-
-  <script type="module" src="js/wb/main-wb.js"></script>
-</body>
-</html>
+</AnimationLayout>

@@ -1,26 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Púlsar de Vela</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-  </script>
-</head>
-<body>
-  <canvas id="space-canvas"></canvas>
-
+---
+import AnimationLayout from '../../layouts/AnimationLayout.astro';
+---
+<AnimationLayout
+  title="Púlsar de Vela (PSR B0833-45)"
+  subtitle="Estrella de neutrones · Rotación: 11.195 ms · Distancia: 936 años luz"
+  scriptSrc="js/pulsar/vela.js"
+>
   <header class="top-bar">
     <h1>Púlsar de Vela (PSR B0833-45)</h1>
     <div class="subtitle">Estrella de neutrones · Rotación: 11.195 ms · Distancia: 936 años luz</div>
-    <a class="nav-link" href="index.html">← Catálogo</a>
+    <a class="nav-link" href="/astro-animations/">← Catálogo</a>
   </header>
 
   <section class="phase-panel">
@@ -53,7 +42,6 @@
     </div>
   </section>
 
-
   <section class="controls">
     <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
     <button id="btn-mute" class="ctrl-btn">🔊 Sonido</button>
@@ -70,7 +58,4 @@
       </select>
     </div>
   </section>
-
-  <script type="module" src="js/pulsar.js"></script>
-</body>
-</html>
+</AnimationLayout>
