@@ -45,7 +45,7 @@ export const animations: Animation[] = [
     title: 'Púlsar de Vela (PSR B0833-45)',
     description: 'Una estrella de neutrones girando 89 veces por segundo, emitiendo pulsos de radio y rayos gamma como un faro cósmico.',
     category: 'pulsar',
-    tags: ['Estrella de neutrones', 'Rotación extrema', 'Audio sincronizado'],
+    tags: ['Estrella de neutrones', 'Rotación extrema', 'Audio 3D sincronizado'],
     thumbnail: '/thumbnails/pulsar-vela.jpg',
     difficulty: 'intermedio',
     duration: '∞'
