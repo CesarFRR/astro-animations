@@ -45,7 +45,7 @@ const PULSAR_CONFIG = {
 };
 
 let playing = true;
-let speed = 1;  // 1x = velocidad real
+let speed = 0.1;  // 0.1x para visualización educativa
 let rotationAngle = 0;
 
 // ============================================
