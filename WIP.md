@@ -44,24 +44,24 @@ npm run generate   # scaffolding para nueva animación
 
 ---
 
-## Background estelar unificado
+## Lienzo de fondo estelar
 
-Actualmente hay **dos** implementaciones del cielo de fondo:
+Actualmente hay **dos** implementaciones del cielo de fondo. La idea es elegir la mejor
+y que sirva de lienzo para todas las animaciones:
 
 | Archivo | Usado por | Estrellas | Rango | Colores | Twinkle |
 |---|---|---|---|---|---|
 | `public/js/shared/background.js` | Supernova, BH, WD | 2500 | 40–140 | Temperatura simple | ❌ |
-| `public/js/pulsar/starfield.js` | Crab, Vela | 5000 | 60–560 | Tipos espectrales (OBAFGKM) | ✅ individual |
+| `public/js/pulsar/starfield.js` | Crab, Vela | **5000** | **60–560** | **Tipos espectrales (OBAFGKM)** | **✅ individual** |
 
-El `pulsar/starfield.js` es muy superior (más estrellas, colores realistas por tipo espectral,
-profundidad de campo, parpadeo individual). La tarea pendiente es:
+**Elegido: `pulsar/starfield.js`** — más estrellas, colores realistas por tipo espectral,
+profundidad de campo, parpadeo individual. Debe convertirse en el lienzo/plantilla
+que todas las animaciones usen de fondo.
 
-- [ ] Reemplazar `shared/background.js` con una versión unificada basada en `pulsar/starfield.js`
-- [ ] Exportar `updateTwinkle()` como parte del módulo compartido
-- [ ] Asegurar que todas las animaciones (Supernova, BH, WD, pulsares) importen desde el mismo sitio
-
-El nuevo módulo unificado debería vivir en `public/js/shared/background.js` pero con
-la calidad del `pulsar/starfield.js`.
+- [ ] Mover `pulsar/starfield.js` → `shared/starfield.js` (o similar) como módulo compartido
+- [ ] Exportar `createStarfield()` y `updateTwinkle()` para que todas las animaciones los importen
+- [ ] Reemplazar las llamadas a `shared/background.js` por el nuevo módulo en Supernova, BH y WD
+- [ ] Eliminar `shared/background.js` una vez migrado todo
 
 ---
 
