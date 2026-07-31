@@ -5,23 +5,24 @@ import { WbLightCurve } from "./lightcurve-wb.js";
 import { updateHud } from "./hud-wb.js";
 import { updateCaption } from "./captions-wb.js";
 import { getPhaseAt, phaseAge, lerp, easeInOut, easeOutCubic, TOTAL_DURATION } from "./phases-wb.js";
-import { createStarfield, createGalaxies } from "../shared/background.js";
+import { createScene } from "../shared/setup.js";
+import { createStarfield, updateTwinkle } from "../shared/starfield.js";
+import { createGalaxies } from "../shared/background.js";
 
-const canvas = document.getElementById("space-canvas");
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x05070a, 0.012);
-
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 0, 12);
+const { scene, camera, controls, composer } = createScene({
+  cameraPos: [0, 0, 12],
+  cameraFov: 55,
+  fogColor: 0x05070a,
+  fogDensity: 0.004,
+  bloomStrength: 1.0,
+  bloomRadius: 0.85,
+  bloomThreshold: 0.35,
+});
 
 const worldGroup = new THREE.Group();
 scene.add(worldGroup);
 
-createStarfield(worldGroup, 2500);
+const sf = createStarfield(worldGroup, 2500);
 createGalaxies(worldGroup, 24);
 
 const star = new WbStar(worldGroup);
@@ -105,12 +106,7 @@ function adjustViewport() {
   }
 }
 
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  adjustViewport();
-});
+window.addEventListener("resize", adjustViewport);
 
 function computeHud(phase, local) {
   const age = phaseAge(phase, local);
@@ -161,7 +157,7 @@ function computeHud(phase, local) {
 }
 
 function updateScene(phase, local, dt, totalTime) {
-  // Camera per phase
+  // Camera per phase (OrbitControls handles orientation)
   let targetZ = 12;
   if (phase === "redGiant") targetZ = lerp(12, 26, local);
   else if (phase === "heliumFlash") targetZ = lerp(26, 18, local);
@@ -169,9 +165,6 @@ function updateScene(phase, local, dt, totalTime) {
   else if (phase === "planetaryNebula") targetZ = lerp(30, 36, local);
   else if (phase === "whiteDwarf") targetZ = lerp(36, 22, local);
   camera.position.z = lerp(camera.position.z, targetZ, 0.03);
-  camera.position.x = Math.sin(totalTime * 0.08) * 0.4;
-  camera.position.y = Math.cos(totalTime * 0.06) * 0.25;
-  camera.lookAt(0, 0, 0);
 
   star.show();
 
@@ -245,10 +238,12 @@ function animate() {
     timeline.value = Math.round(globalProgress * 1000);
   }
 
+  updateTwinkle(sf, clock.elapsedTime);
   const { key, localProgress } = getPhaseAt(globalProgress);
   updateScene(key, localProgress, dt, clock.elapsedTime);
 
-  renderer.render(scene, camera);
+  controls.update();
+  composer.render();
 }
 
 resetSimulation();
