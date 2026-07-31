@@ -1,11 +1,17 @@
 ---
 const base = "/astro-animations";
+
 export interface Props {
   title: string;
   subtitle: string;
   scriptSrc: string;
+  navHref?: string;
+  navLabel?: string;
+  phaseTitle?: string;
+  phaseCaption?: string;
 }
-const { title, subtitle, scriptSrc } = Astro.props;
+
+const { title, subtitle, scriptSrc, navHref = "/astro-animations/", navLabel = "← Catálogo", phaseTitle = "—", phaseCaption = "—" } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -25,7 +31,52 @@ const { title, subtitle, scriptSrc } = Astro.props;
 </head>
 <body>
   <canvas id="space-canvas"></canvas>
+
+  <div class="app-overlay">
+    <header class="top-bar">
+      <h1>{title}</h1>
+      <div class="subtitle">{subtitle}</div>
+      <a class="nav-link" href={navHref}>{navLabel}</a>
+    </header>
+
+    <main class="widgets-grid">
+      <section class="widget phase-panel">
+        <div class="phase-header">
+          <h2 id="phase-title">{phaseTitle}</h2>
+          <slot name="phase-actions" />
+        </div>
+        <p id="phase-caption">{phaseCaption}</p>
+      </section>
+
+      <slot name="hud" />
+      <slot name="legend" />
+      <slot name="chart" />
+    </main>
+
+    <section class="controls">
+      <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
+      <slot name="controls" />
+      <div class="speed-control">
+        <label for="speed">Velocidad</label>
+        <select id="speed">
+          <option value="0.1">0.1×</option>
+          <option value="0.25">0.25×</option>
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="2.5">2.5×</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
+          <option value="5">5×</option>
+          <option value="10">10×</option>
+        </select>
+      </div>
+      <slot name="timeline" />
+    </section>
+  </div>
+
   <slot />
+
   <script type="module" src={`${base}/${scriptSrc}`}></script>
 </body>
 </html>

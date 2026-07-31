@@ -5,22 +5,16 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
   title="Supernova que deja un Agujero Negro"
   subtitle="Masa: >25–40 M☉ · Colapso de núcleo · Remanente: agujero negro con disco de acreción"
   scriptSrc="js/bh/main-bh.js"
+  navHref="/astro-animations/"
+  navLabel="← Catálogo"
+  phaseTitle="Supergigante roja"
+  phaseCaption="Una estrella de más de ~25 masas solares vive rápido y muere joven."
 >
-  <header class="top-bar">
-    <h1>Supernova que deja un Agujero Negro</h1>
-    <div class="subtitle">Masa: &gt;25–40 M☉ · Colapso de núcleo · Remanente: agujero negro con disco de acreción</div>
-    <a class="nav-link" href="/astro-animations/animaciones/supernova-pares/">← Supernova de inestabilidad de pares</a>
-  </header>
+  <div slot="phase-actions">
+    <button id="mobile-curve-toggle" class="mobile-only-btn" title="Mostrar/ocultar curva de luz">📈 Curva</button>
+  </div>
 
-  <section class="phase-panel">
-    <div class="phase-header">
-      <h2 id="phase-title">Supergigante roja</h2>
-      <button id="mobile-curve-toggle" class="mobile-only-btn" title="Mostrar/ocultar curva de luz">📈 Curva</button>
-    </div>
-    <p id="phase-caption">Una estrella de más de ~25 masas solares vive rápido y muere joven.</p>
-  </section>
-
-  <section class="hud">
+  <section class="hud" slot="hud">
     <div class="gauge">
       <span class="gauge-label">T núcleo (GK)</span>
       <div class="gauge-bar"><div id="t-bar" class="gauge-fill" style="width: 10%"></div></div>
@@ -43,7 +37,7 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
     </div>
   </section>
 
-  <section class="lightcurve-panel">
+  <section class="lightcurve-panel" slot="chart">
     <div class="panel-header">
       <h3>Curva de luz</h3>
       <button id="toggle-comparison" class="toggle-btn active" title="Mostrar/ocultar curvas de comparación">Comparar SN II-P / fallida</button>
@@ -51,39 +45,23 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
     <svg id="lightcurve-svg" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet"></svg>
   </section>
 
-  <section class="legend">
+  <section class="legend" slot="legend">
     <div class="legend-item"><span class="dot neutrino"></span>Neutrinos ν</div>
     <div class="legend-item"><span class="dot ejecta"></span>Eyección</div>
     <div class="legend-item"><span class="dot accretion"></span>Materia al disco</div>
     <div class="legend-item"><span class="dot jet"></span>Jets ~0.99c</div>
   </section>
 
-  <section class="controls">
-    <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
-    <button id="btn-restart" class="ctrl-btn">↺ Reiniciar</button>
-    <div class="speed-control">
-      <label for="speed">Velocidad</label>
-      <select id="speed">
-        <option value="0.25">0.25×</option>
-        <option value="0.5">0.5×</option>
-        <option value="1" selected>1×</option>
-        <option value="2">2×</option>
-        <option value="2.5">2.5×</option>
-        <option value="3">3×</option>
-        <option value="4">4×</option>
-        <option value="5">5×</option>
-      </select>
+  <button id="btn-restart" class="ctrl-btn" slot="controls">↺ Reiniciar</button>
+  <div class="timeline-wrap" slot="timeline">
+    <input id="timeline" type="range" min="0" max="1000" value="0" step="1">
+    <div class="phase-labels">
+      <span>Supergigante</span>
+      <span>Cebolla</span>
+      <span>Colapso</span>
+      <span>Explosión</span>
+      <span>Agujero negro</span>
+      <span>Disco</span>
     </div>
-    <div class="timeline-wrap">
-      <input id="timeline" type="range" min="0" max="1000" value="0" step="1">
-      <div class="phase-labels">
-        <span>Supergigante</span>
-        <span>Cebolla</span>
-        <span>Colapso</span>
-        <span>Explosión</span>
-        <span>Agujero negro</span>
-        <span>Disco</span>
-      </div>
-    </div>
-  </section>
+  </div>
 </AnimationLayout>

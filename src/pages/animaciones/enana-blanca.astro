@@ -5,22 +5,16 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
   title="De Gigante Roja a Enana Blanca"
   subtitle="Estrella de ~1 M☉ · Muerte tranquila · El núcleo sobrevive como enana blanca"
   scriptSrc="js/wb/main-wb.js"
+  navHref="/astro-animations/"
+  navLabel="← Catálogo"
+  phaseTitle="Secuencia principal"
+  phaseCaption="Una estrella como el Sol pasa miles de millones de años fusionando hidrógeno en helio."
 >
-  <header class="top-bar">
-    <h1>De Gigante Roja a Enana Blanca</h1>
-    <div class="subtitle">Estrella de ~1 M☉ · Muerte tranquila · El núcleo sobrevive como enana blanca</div>
-    <a class="nav-link" href="/astro-animations/animaciones/agujero-negro/">Supernova a agujero negro →</a>
-  </header>
+  <div slot="phase-actions">
+    <button id="mobile-curve-toggle" class="mobile-only-btn" title="Mostrar/ocultar curva de luz">📈 Curva</button>
+  </div>
 
-  <section class="phase-panel">
-    <div class="phase-header">
-      <h2 id="phase-title">Secuencia principal</h2>
-      <button id="mobile-curve-toggle" class="mobile-only-btn" title="Mostrar/ocultar curva de luz">📈 Curva</button>
-    </div>
-    <p id="phase-caption">Una estrella como el Sol pasa miles de millones de años fusionando hidrógeno en helio.</p>
-  </section>
-
-  <section class="hud">
+  <section class="hud" slot="hud">
     <div class="gauge">
       <span class="gauge-label">T superficie</span>
       <div class="gauge-bar"><div id="t-bar" class="gauge-fill" style="width: 30%"></div></div>
@@ -43,7 +37,7 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
     </div>
   </section>
 
-  <section class="lightcurve-panel">
+  <section class="lightcurve-panel" slot="chart">
     <div class="panel-header">
       <h3>Luminosidad vs edad</h3>
       <button id="toggle-comparison" class="toggle-btn active" title="Mostrar/ocultar curva de enfriamiento de la enana blanca">Enfriamiento WD</button>
@@ -51,39 +45,23 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
     <svg id="lightcurve-svg" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet"></svg>
   </section>
 
-  <section class="legend">
+  <section class="legend" slot="legend">
     <div class="legend-item"><span class="dot wind"></span>Viento estelar</div>
     <div class="legend-item"><span class="dot halpha"></span>Hidrógeno (Hα)</div>
     <div class="legend-item"><span class="dot oiii"></span>Oxígeno [O III]</div>
     <div class="legend-item"><span class="dot uv"></span>Fotones UV</div>
   </section>
 
-  <section class="controls">
-    <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
-    <button id="btn-restart" class="ctrl-btn">↺ Reiniciar</button>
-    <div class="speed-control">
-      <label for="speed">Velocidad</label>
-      <select id="speed">
-        <option value="0.25">0.25×</option>
-        <option value="0.5">0.5×</option>
-        <option value="1" selected>1×</option>
-        <option value="2">2×</option>
-        <option value="2.5">2.5×</option>
-        <option value="3">3×</option>
-        <option value="4">4×</option>
-        <option value="5">5×</option>
-      </select>
+  <button id="btn-restart" class="ctrl-btn" slot="controls">↺ Reiniciar</button>
+  <div class="timeline-wrap" slot="timeline">
+    <input id="timeline" type="range" min="0" max="1000" value="0" step="1">
+    <div class="phase-labels">
+      <span>Sec. principal</span>
+      <span>Gig. roja</span>
+      <span>Helio</span>
+      <span>AGB</span>
+      <span>Nebulosa</span>
+      <span>E. blanca</span>
     </div>
-    <div class="timeline-wrap">
-      <input id="timeline" type="range" min="0" max="1000" value="0" step="1">
-      <div class="phase-labels">
-        <span>Sec. principal</span>
-        <span>Gig. roja</span>
-        <span>Helio</span>
-        <span>AGB</span>
-        <span>Nebulosa</span>
-        <span>E. blanca</span>
-      </div>
-    </div>
-  </section>
+  </div>
 </AnimationLayout>

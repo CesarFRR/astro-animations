@@ -5,21 +5,10 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
   title="Púlsar del Cangrejo (PSR B0531+21)"
   subtitle="Estrella de neutrones · Rotación: 33.112 ms · Distancia: 6,500 años luz"
   scriptSrc="js/pulsar/crab.js"
+  phaseTitle="Rotación estable"
+  phaseCaption="El núcleo colapsado de la supernova SN 1054, una estrella de neutrones girando 30 veces por segundo en el corazón de la Nebulosa del Cangrejo."
 >
-  <header class="top-bar">
-    <h1>Púlsar del Cangrejo (PSR B0531+21)</h1>
-    <div class="subtitle">Estrella de neutrones · Rotación: 33.112 ms · Distancia: 6,500 años luz</div>
-    <a class="nav-link" href="/astro-animations/">← Catálogo</a>
-  </header>
-
-  <section class="phase-panel">
-    <div class="phase-header">
-      <h2 id="phase-title">Rotación estable</h2>
-    </div>
-    <p id="phase-caption">El núcleo colapsado de la supernova SN 1054, una estrella de neutrones girando 30 veces por segundo en el corazón de la Nebulosa del Cangrejo.</p>
-  </section>
-
-  <section class="hud">
+  <section class="hud" slot="hud">
     <div class="gauge">
       <span class="gauge-label">Frecuencia de rotación</span>
       <div class="gauge-bar"><div id="freq-bar" class="gauge-fill" style="width: 30%"></div></div>
@@ -42,20 +31,5 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
     </div>
   </section>
 
-  <section class="controls">
-    <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
-    <button id="btn-mute" class="ctrl-btn">🔊 Sonido</button>
-    <div class="speed-control">
-      <label for="speed">Velocidad</label>
-      <select id="speed">
-        <option value="0.1">0.1×</option>
-        <option value="0.25">0.25×</option>
-        <option value="0.5">0.5×</option>
-        <option value="1" selected>1×</option>
-        <option value="2">2×</option>
-        <option value="5">5×</option>
-        <option value="10">10×</option>
-      </select>
-    </div>
-  </section>
+  <button id="btn-mute" class="ctrl-btn" slot="controls">🔊 Sonido</button>
 </AnimationLayout>

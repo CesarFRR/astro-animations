@@ -7,7 +7,9 @@ import { BhLightCurve } from "./lightcurve-bh.js";
 import { updateHud } from "./hud-bh.js";
 import { updateCaption } from "./captions-bh.js";
 import { getPhaseAt, phaseDay, lerp, easeInOut, easeOutCubic, easeInCubic, TOTAL_DURATION } from "./phases-bh.js";
-import { createStarfield, createGalaxies } from "../shared/background.js";
+import { createStarfield, updateTwinkle } from "../shared/starfield.js";
+import { createGalaxies } from "../shared/background.js";
+import { createOrbitControls } from "../shared/setup.js";
 
 // Redshift palette for collapse: [white, yellow, orange, red, dark red, near-black]
 const COLLAPSE_COLORS = [
@@ -35,15 +37,17 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.85;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x05070a, 0.012);
+scene.fog = new THREE.FogExp2(0x05070a, 0.004);
 
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 0, 18);
 
+const controls = createOrbitControls(camera, canvas, { maxDistance: 200 });
+
 const worldGroup = new THREE.Group();
 scene.add(worldGroup);
 
-createStarfield(worldGroup, 3000);
+const sf = createStarfield(worldGroup, 3000);
 createGalaxies(worldGroup, 36);
 
 const star = new BhStar(worldGroup);
@@ -194,7 +198,7 @@ function computeHud(phase, local) {
 }
 
 function updateScene(phase, local, dt, totalTime) {
-  // Camera per phase
+  // Camera per phase (OrbitControls handles orientation)
   let targetZ = 16;
   if (phase === "onionLayers") targetZ = lerp(16, 22, local);
   else if (phase === "coreCollapse") targetZ = lerp(22, 15, local);
@@ -202,9 +206,6 @@ function updateScene(phase, local, dt, totalTime) {
   else if (phase === "blackHole") targetZ = lerp(30, 17, local);
   else if (phase === "accretionDisk") targetZ = lerp(17, 13, local);
   camera.position.z = lerp(camera.position.z, targetZ, 0.03);
-  camera.position.x = Math.sin(totalTime * 0.07) * 0.4;
-  camera.position.y = Math.cos(totalTime * 0.05) * 0.3 + (phase === "accretionDisk" ? 1.2 : 0);
-  camera.lookAt(0, 0, 0);
 
   if (phase === "supergiant") {
     star.show();
@@ -304,6 +305,7 @@ function animate() {
     timeline.value = Math.round(globalProgress * 1000);
   }
 
+  updateTwinkle(sf, clock.elapsedTime);
   const { key, localProgress } = getPhaseAt(globalProgress);
   updateScene(key, localProgress, dt, clock.elapsedTime);
 
@@ -311,6 +313,7 @@ function animate() {
   worldGroup.updateMatrixWorld();
   const worldOrigin = new THREE.Vector3(0, 0, 0).applyMatrix4(worldGroup.matrixWorld);
   lensing.update(camera, worldOrigin, lensingStrength, 8.5, 1.0);
+  controls.update();
   lensing.render();
 }
 

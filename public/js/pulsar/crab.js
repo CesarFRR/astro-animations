@@ -2,10 +2,10 @@ import * as THREE from "three";
 import { NeutronStar } from "./core.js";
 import { PulsarBeam } from "./beam.js";
 import { PulsarAudio } from "./audio.js";
-import { createStarfield, updateTwinkle } from "./starfield.js";
+import { createStarfield, updateTwinkle } from "../shared/starfield.js";
 import { EquatorialRing } from "./ring.js";
 import { DustJet } from "./jet.js";
-import { createScene, createGroups, addPulsarLighting } from "./setup.js";
+import { createScene, createGroups, addPulsarLighting } from "../shared/setup.js";
 
 const { scene, camera, controls, composer, renderer } = createScene();
 const { container, pulsar, beam } = createGroups(scene, 0.28, 0.15);

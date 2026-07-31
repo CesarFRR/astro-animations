@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "generate": "node scripts/generate.mjs",
+    "thumbnails": "node scripts/thumbnails.mjs",
     "deploy": "npm run build && npx gh-pages -d dist"
   },
   "dependencies": {

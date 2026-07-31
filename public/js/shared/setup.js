@@ -4,7 +4,18 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
-export function createScene() {
+export function createScene(opts = {}) {
+  const {
+    bloomStrength = 1.8,
+    bloomRadius = 1.0,
+    bloomThreshold = 0.08,
+    fogColor = 0x020205,
+    fogDensity = 0.003,
+    cameraPos = [10, 8, 40],
+    cameraFov = 50,
+    enableControls = true,
+  } = opts;
+
   const canvas = document.getElementById("space-canvas");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -13,10 +24,10 @@ export function createScene() {
   renderer.toneMappingExposure = 1.3;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x020205, 0.003);
+  scene.fog = new THREE.FogExp2(fogColor, fogDensity);
 
-  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-  camera.position.set(10, 8, 40);
+  const camera = new THREE.PerspectiveCamera(cameraFov, window.innerWidth / window.innerHeight, 0.1, 2000);
+  camera.position.set(...cameraPos);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
@@ -27,7 +38,10 @@ export function createScene() {
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.8, 1.0, 0.08);
+  const bloom = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    bloomStrength, bloomRadius, bloomThreshold
+  );
   composer.addPass(bloom);
 
   window.addEventListener("resize", () => {
@@ -38,6 +52,21 @@ export function createScene() {
   });
 
   return { renderer, scene, camera, controls, composer, bloom, canvas };
+}
+
+export function createOrbitControls(camera, canvas, opts = {}) {
+  const {
+    damping = 0.05,
+    minDistance = 5,
+    maxDistance = 150,
+  } = opts;
+  const controls = new OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = damping;
+  controls.minDistance = minDistance;
+  controls.maxDistance = maxDistance;
+  controls.target.set(0, 0, 0);
+  return controls;
 }
 
 export function createGroups(scene, tiltAngle, beamTilt) {

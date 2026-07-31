@@ -1,6 +1,6 @@
 :root {
   --bg: #05070a;
-  --panel: rgba(10, 16, 28, 0.78);
+  --panel: rgba(10, 16, 28, 0.85);
   --panel-border: rgba(80, 150, 255, 0.22);
   --text: #e6f0ff;
   --muted: #8aa4c8;
@@ -40,6 +40,7 @@ html, body {
   z-index: 0;
 }
 
+/* ===== TOP BAR ===== */
 .top-bar {
   position: fixed;
   top: 0;
@@ -53,7 +54,7 @@ html, body {
 
 .top-bar h1 {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-shadow: 0 0 22px rgba(79, 172, 254, 0.5);
@@ -61,204 +62,9 @@ html, body {
 
 .top-bar .subtitle {
   margin-top: 0.35rem;
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
   color: var(--muted);
 }
-
-.phase-panel {
-  position: fixed;
-  top: 6.2rem;
-  left: 1.5rem;
-  width: 440px;
-  z-index: 10;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 16px;
-  padding: 1.3rem 1.5rem;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
-}
-
-.phase-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.7rem;
-}
-
-.phase-panel h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: var(--accent);
-}
-
-.phase-panel p {
-  margin: 0;
-  line-height: 1.6;
-  font-size: 1.05rem;
-  color: var(--text);
-}
-
-.mobile-only-btn {
-  display: none;
-  background: rgba(79, 172, 254, 0.15);
-  border: 1px solid var(--accent);
-  color: var(--text);
-  border-radius: 6px;
-  padding: 0.3rem 0.55rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-.mobile-only-btn:hover,
-.mobile-only-btn.active {
-  background: rgba(79, 172, 254, 0.35);
-}
-
-.hud {
-  position: fixed;
-  top: 6.2rem;
-  right: 1.5rem;
-  width: 300px;
-  z-index: 10;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 16px;
-  padding: 1.2rem 1.4rem;
-  backdrop-filter: blur(8px);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
-}
-
-.gauge {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.gauge-label {
-  font-size: 0.9rem;
-  color: var(--muted);
-  display: flex;
-  justify-content: space-between;
-}
-
-.gauge-bar {
-  width: 100%;
-  height: 11px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.gauge-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius: 5px;
-  transition: width 0.2s ease-out;
-}
-
-.gauge-value {
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-align: right;
-}
-
-.lightcurve-panel {
-  position: fixed;
-  bottom: 7.5rem;
-  right: 1.5rem;
-  width: 440px;
-  z-index: 10;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 16px;
-  padding: 1.1rem 1.3rem;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.8rem;
-}
-
-.lightcurve-panel h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: var(--accent);
-}
-
-.lightcurve-panel svg {
-  width: 100%;
-  height: 210px;
-  display: block;
-}
-
-.toggle-btn {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid var(--panel-border);
-  color: var(--muted);
-  border-radius: 8px;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.toggle-btn:hover,
-.toggle-btn.active {
-  background: rgba(79, 172, 254, 0.18);
-  color: var(--text);
-  border-color: var(--accent);
-}
-
-.legend {
-  position: fixed;
-  bottom: 7.5rem;
-  left: 1.5rem;
-  z-index: 10;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  padding: 0.85rem 1.25rem;
-  backdrop-filter: blur(8px);
-  display: flex;
-  gap: 1.25rem;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
-  font-size: 1rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.dot {
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.dot.gamma { background: var(--gamma); box-shadow: 0 0 8px var(--gamma); }
-.dot.electron { background: var(--electron); }
-.dot.positron { background: var(--positron); }
-.dot.nickel { background: var(--nickel); }
-.dot.wind { background: #ff7744; }
-.dot.halpha { background: #ff3355; box-shadow: 0 0 8px #ff3355; }
-.dot.oiii { background: #33ff99; box-shadow: 0 0 8px #33ff99; }
-.dot.uv { background: #99ccff; box-shadow: 0 0 8px #99ccff; }
-.dot.neutrino { background: #aaffee; box-shadow: 0 0 8px #aaffee; }
-.dot.ejecta { background: #ff8844; }
-.dot.accretion { background: #ffdd44; }
-.dot.jet { background: #aaccff; box-shadow: 0 0 8px #aaccff; }
 
 .nav-link {
   position: absolute;
@@ -281,6 +87,246 @@ html, body {
   box-shadow: 0 0 12px rgba(79, 172, 254, 0.3);
 }
 
+/* ===== WIDGETS GRID =====
+   Los widgets conservan su tamaño natural (como el diseño original) pero
+   viven en celdas del grid: nunca se superponen, y el espacio sobrante
+   entre ellos deja ver la animación. */
+.widgets-grid {
+  position: fixed;
+  z-index: 10;
+  top: 6.4rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 6.4rem;
+  display: grid;
+  grid-template-areas:
+    "desc hud"
+    "legend chart";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: none;
+}
+
+.widgets-grid > * { pointer-events: auto; }
+
+/* --- Widget: descripción de fase --- */
+.phase-panel {
+  grid-area: desc;
+  align-self: start;
+  justify-self: start;
+  width: 100%;
+  max-width: 420px;
+  max-height: 36vh;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.3rem 1.5rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.phase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.phase-panel h2 {
+  margin: 0;
+  font-size: clamp(1.15rem, 1.7vw, 1.4rem);
+  color: var(--accent);
+  line-height: 1.25;
+}
+
+.phase-panel p {
+  margin: 0;
+  line-height: 1.6;
+  font-size: clamp(0.88rem, 1.2vw, 1.02rem);
+}
+
+.mobile-only-btn {
+  display: none;
+  background: rgba(79, 172, 254, 0.15);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mobile-only-btn:hover,
+.mobile-only-btn.active {
+  background: rgba(79, 172, 254, 0.35);
+}
+
+/* --- Widget: HUD / stats --- */
+.hud {
+  grid-area: hud;
+  align-self: start;
+  width: 100%;
+  height: auto;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 0.9rem 1.1rem;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 0.35rem;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.gauge-label {
+  font-size: clamp(0.72rem, 1vw, 0.88rem);
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.gauge-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 5px;
+  transition: width 0.2s ease-out;
+}
+
+.gauge-value {
+  font-size: clamp(0.68rem, 0.92vw, 0.8rem);
+  font-weight: 600;
+  text-align: right;
+}
+
+/* --- Widget: leyenda (barra compacta, acoplada al contenido) --- */
+.legend {
+  grid-area: legend;
+  align-self: end;
+  justify-self: start;
+  width: auto;
+  height: auto;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 0.85rem 1.25rem;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1.25rem;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+  font-size: clamp(0.9rem, 1.15vw, 1rem);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot.gamma { background: var(--gamma); box-shadow: 0 0 8px var(--gamma); }
+.dot.electron { background: var(--electron); }
+.dot.positron { background: var(--positron); }
+.dot.nickel { background: var(--nickel); }
+.dot.wind { background: #ff7744; }
+.dot.halpha { background: #ff3355; box-shadow: 0 0 8px #ff3355; }
+.dot.oiii { background: #33ff99; box-shadow: 0 0 8px #33ff99; }
+.dot.uv { background: #99ccff; box-shadow: 0 0 8px #99ccff; }
+.dot.neutrino { background: #aaffee; box-shadow: 0 0 8px #aaffee; }
+.dot.ejecta { background: #ff8844; }
+.dot.accretion { background: #ffdd44; }
+.dot.jet { background: #aaccff; box-shadow: 0 0 8px #aaccff; }
+
+/* --- Widget: curva / gráfica (protagonista) --- */
+.lightcurve-panel {
+  grid-area: chart;
+  align-self: stretch;
+  height: 100%;
+  min-height: 240px;
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+}
+
+.lightcurve-panel h3 {
+  margin: 0;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  color: var(--accent);
+}
+
+.lightcurve-panel svg {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: block;
+}
+
+.toggle-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid var(--panel-border);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.toggle-btn:hover,
+.toggle-btn.active {
+  background: rgba(79, 172, 254, 0.18);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* ===== CONTROLS ===== */
 .controls {
   position: fixed;
   bottom: 0;
@@ -306,6 +352,7 @@ html, body {
   cursor: pointer;
   transition: all 0.15s;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .ctrl-btn:hover {
@@ -330,6 +377,7 @@ html, body {
   gap: 0.6rem;
   font-size: 1rem;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .speed-control select {
@@ -362,6 +410,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  min-width: 120px;
 }
 
 #timeline {
@@ -398,222 +447,129 @@ html, body {
 .phase-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.82rem;
+  font-size: clamp(0.7rem, 0.9vw, 0.85rem);
   color: var(--muted);
   padding: 0 0.2rem;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
-  .phase-panel { width: 380px; }
-  .hud { width: 280px; }
-  .lightcurve-panel { width: 400px; }
+  .widgets-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: 0.9rem;
+  }
+  .legend { gap: 1rem; padding: 0.8rem 1.15rem; }
 }
 
 @media (max-width: 1024px) {
-  .top-bar h1 { font-size: 1.55rem; }
-  .top-bar .subtitle { font-size: 0.9rem; }
-  .phase-panel { width: 340px; padding: 1.1rem 1.3rem; }
-  .phase-panel h2 { font-size: 1.35rem; }
-  .phase-panel p { font-size: 1rem; }
-  .hud { width: 250px; padding: 1rem 1.2rem; gap: 0.85rem; }
-  .lightcurve-panel { width: 360px; padding: 1rem 1.2rem; }
-  .lightcurve-panel svg { height: 180px; }
-  .legend { font-size: 0.92rem; padding: 0.75rem 1.1rem; }
+  .top-bar { padding: 0.95rem 1.5rem; }
+  .nav-link { right: 1.5rem; top: 0.95rem; }
+  .widgets-grid { top: 5.6rem; bottom: 5.8rem; grid-template-columns: minmax(0, 1fr) minmax(0, 320px); gap: 0.85rem; }
+  .phase-panel { padding: 1.1rem 1.3rem; }
+  .hud { padding: 1rem 1.2rem; gap: 0.85rem; }
+  .lightcurve-panel { padding: 1rem 1.2rem; }
+  .legend { font-size: 0.92rem; }
 }
 
 @media (max-width: 768px) {
   .top-bar { padding: 0.85rem 1.2rem; }
-  .top-bar h1 { font-size: 1.35rem; }
   .top-bar .subtitle { display: none; }
-
-  .phase-panel {
-    top: 3.6rem;
-    left: 0.75rem;
-    width: calc(60% - 1rem);
-    min-width: 260px;
-    max-width: 400px;
-    padding: 0.85rem 1rem;
-    border-radius: 12px;
+  .nav-link { right: 1.2rem; top: 0.85rem; }
+  .widgets-grid {
+    top: 4.4rem;
+    left: 0.9rem;
+    right: 0.9rem;
+    bottom: 5.6rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    gap: 0.75rem;
   }
-  .phase-panel h2 { font-size: 1.2rem; margin-bottom: 0.45rem; }
-  .phase-panel p { font-size: 0.92rem; line-height: 1.45; }
+  .phase-panel { border-radius: 12px; }
+  .hud { border-radius: 12px; }
+  .lightcurve-panel { border-radius: 12px; }
 
-  .hud {
-    top: 3.6rem;
-    right: 0.75rem;
-    width: calc(40% - 1rem);
-    min-width: 170px;
-    max-width: 260px;
-    padding: 0.85rem 1rem;
-    gap: 0.7rem;
-    border-radius: 12px;
-  }
-  .gauge-label { font-size: 0.78rem; }
-  .gauge-value { font-size: 0.85rem; }
-  .gauge-bar { height: 8px; }
-
-  .lightcurve-panel {
-    bottom: 7rem;
-    right: 0.75rem;
-    width: 48%;
-    min-width: 240px;
-    max-width: 380px;
-    padding: 0.8rem 1rem;
-    border-radius: 12px;
-  }
-  .lightcurve-panel h3 { font-size: 1rem; }
-  .lightcurve-panel svg { height: 150px; }
-  .toggle-btn { font-size: 0.72rem; padding: 0.3rem 0.55rem; }
-
-  .legend {
-    bottom: 7rem;
-    left: 0.75rem;
-    padding: 0.6rem 0.9rem;
-    font-size: 0.85rem;
-    gap: 0.8rem;
-    border-radius: 10px;
-  }
-  .dot { width: 11px; height: 11px; }
-
-  .controls {
-    padding: 0.85rem 1rem;
-    gap: 0.85rem;
-  }
+  .controls { padding: 0.85rem 1rem; gap: 0.85rem; }
   .ctrl-btn { padding: 0.65rem 1rem; font-size: 0.95rem; }
   .speed-control { font-size: 0.9rem; }
-  .speed-control select { font-size: 0.9rem; padding: 0.4rem 0.6rem; }
+  .speed-control select { font-size: 0.9rem; padding: 0.4rem 2rem 0.4rem 0.8rem; }
   .phase-labels { font-size: 0.68rem; }
 }
 
 @media (max-width: 600px) {
-  .phase-panel {
-    width: calc(100% - 1.5rem);
-    max-width: none;
-    top: 3.2rem;
+  .widgets-grid {
+    top: 3.5rem;
     left: 0.75rem;
     right: 0.75rem;
-    padding: 0.85rem 1rem;
+    bottom: 10.5rem;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "desc"
+      "hud"
+      "legend"
+      "chart";
+    grid-template-rows: auto auto auto auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
-  .phase-panel h2 { font-size: 1.1rem; }
-  .phase-panel p { font-size: 0.88rem; }
 
-  .hud {
-    position: fixed;
-    top: auto;
-    bottom: 11rem;
-    left: 0.75rem;
-    right: 0.75rem;
-    width: auto;
-    max-width: none;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.6rem 1rem;
-    padding: 0.75rem 1rem;
-  }
+  .phase-panel { max-height: 40vh; }
+  .hud { height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1rem; }
   .gauge-label { font-size: 0.75rem; }
   .gauge-value { font-size: 0.8rem; }
-
-  .mobile-only-btn {
-    display: inline-block;
-    font-size: 0.8rem;
-    padding: 0.35rem 0.65rem;
-  }
-
-  .lightcurve-panel {
-    display: none;
-    position: fixed;
-    top: auto;
-    bottom: 10.5rem;
-    left: 0.75rem;
-    right: 0.75rem;
-    width: auto;
-    max-width: none;
-    z-index: 11;
-    padding: 0.9rem 1rem;
-  }
-  .lightcurve-panel.visible {
-    display: block;
-  }
-  .lightcurve-panel svg { height: 160px; }
+  .gauge-bar { height: 8px; }
 
   .legend {
-    position: fixed;
-    bottom: 7.6rem;
-    left: 0.75rem;
-    right: 0.75rem;
-    width: auto;
+    position: static;
+    width: 100%;
+    flex-wrap: wrap;
     justify-content: center;
     font-size: 0.8rem;
     gap: 0.75rem;
     padding: 0.5rem 0.8rem;
+    border-radius: 10px;
   }
+  .dot { width: 11px; height: 11px; }
 
-  .controls {
-    flex-wrap: wrap;
-    gap: 0.65rem;
-    padding: 0.75rem;
+  .mobile-only-btn { display: inline-block; font-size: 0.8rem; padding: 0.35rem 0.65rem; }
+
+  .lightcurve-panel {
+    display: none;
+    min-height: 260px;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
   }
-  .timeline-wrap {
-    order: 3;
-    width: 100%;
-    flex: none;
-  }
-  #timeline {
-    height: 12px;
-    border-radius: 6px;
-  }
-  #timeline::-webkit-slider-thumb {
-    width: 26px;
-    height: 26px;
-  }
-  #timeline::-moz-range-thumb {
-    width: 26px;
-    height: 26px;
-  }
+  .lightcurve-panel.visible { display: flex; }
+
+  .controls { flex-wrap: wrap; gap: 0.65rem; padding: 0.75rem; }
+  .timeline-wrap { order: 3; width: 100%; flex: none; }
+  #timeline { height: 12px; border-radius: 6px; }
+  #timeline::-webkit-slider-thumb { width: 26px; height: 26px; }
+  #timeline::-moz-range-thumb { width: 26px; height: 26px; }
   .phase-labels { font-size: 0.6rem; }
-
-  .ctrl-btn {
-    padding: 0.7rem 1.1rem;
-    font-size: 0.95rem;
-    min-height: 48px;
-  }
-  .speed-control select {
-    min-height: 48px;
-    font-size: 0.9rem;
-  }
+  .ctrl-btn { padding: 0.7rem 1.1rem; font-size: 0.95rem; min-height: 48px; }
+  .speed-control select { min-height: 48px; font-size: 0.9rem; }
 }
 
 @media (max-width: 600px) and (orientation: landscape) {
   .top-bar { display: none; }
-  .phase-panel {
+  .widgets-grid {
     top: 0.5rem;
-    width: 55%;
-    padding: 0.7rem 0.9rem;
+    bottom: 6rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
+    grid-template-areas:
+      "desc hud"
+      "legend chart";
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow-y: auto;
   }
-  .hud {
-    bottom: auto;
-    top: 0.5rem;
-    right: 0.5rem;
-    left: auto;
-    width: 40%;
-    display: flex;
-    flex-direction: column;
-  }
-  .legend {
-    bottom: 4.2rem;
-    left: 0.5rem;
-    right: auto;
-    width: auto;
-  }
-  .controls {
-    padding: 0.6rem 0.9rem;
-  }
+  .hud { display: flex; flex-direction: column; }
+  .lightcurve-panel { min-height: 0; }
+  .legend { justify-content: flex-start; }
+  .lightcurve-panel { display: flex; }
+  .controls { padding: 0.6rem 0.9rem; }
 }
 
 @media (max-width: 360px) {
   .top-bar h1 { font-size: 1.15rem; }
-  .phase-panel h2 { font-size: 1rem; }
-  .phase-panel p { font-size: 0.82rem; }
   .hud { grid-template-columns: 1fr; }
   .legend { gap: 0.55rem; font-size: 0.75rem; }
 }
