@@ -29,20 +29,23 @@ const gauges = {
   distancia: document.getElementById("gauge-distancia"),
   velocidad: document.getElementById("gauge-velocidad"),
   fase: document.getElementById("gauge-fase"),
+  foco: document.getElementById("gauge-foco"),
 };
+
+const fill = (span) => span?.parentElement?.querySelector(".gauge-fill");
 
 function actualizarHUD() {
   if (!gauges.dias) return;
   const dias = base.sim.dias % 365.2422;
-  gauges.dias.firstElementChild.lastElementChild.textContent = `${Math.floor(dias)} d`;
+  gauges.dias.textContent = `${Math.floor(dias)} d`;
   const dist = distanciaTierraSol(base.sim, base.sim.a);
-  gauges.distancia.firstElementChild.lastElementChild.textContent = `${dist.toFixed(3)} ua`;
-  gauges.distancia.lastElementChild.style.width = `${((dist - (20 * (1 - 0.0167))) / (20 * 0.0334)) * 100}%`;
+  gauges.distancia.textContent = `${dist.toFixed(3)} ua`;
+  fill(gauges.distancia).style.width = `${((dist - (20 * (1 - 0.0167))) / (20 * 0.0334)) * 100}%`;
   const v = VELOCIDAD_ORBITAL * Math.sqrt((2 * 20) / dist - 1 / 20);
-  gauges.velocidad.firstElementChild.lastElementChild.textContent = `${v.toFixed(1)} km/s`;
+  gauges.velocidad.textContent = `${v.toFixed(1)} km/s`;
   const fase = Math.round((base.sim.MLuna / (Math.PI * 2)) * 100) % 100;
-  gauges.fase.firstElementChild.lastElementChild.textContent = `Luna ${fase}%`;
-  gauges.fase.lastElementChild.style.width = `${fase}%`;
+  gauges.fase.textContent = `Luna ${fase}%`;
+  fill(gauges.fase).style.width = `${fase}%`;
 }
 
 let playing = true;
@@ -70,12 +73,78 @@ speedSelect.addEventListener("change", (e) => {
   speed = parseFloat(e.target.value);
 });
 
+const CUERPOS = {
+  sol: { objeto: base.solMesh, distancia: 6 },
+  tierra: { objeto: base.tierra, distancia: 4.5 },
+  luna: { objeto: base.luna, distancia: 1.8 },
+};
+const NOMBRES = { sol: "Sol", tierra: "Tierra", luna: "Luna" };
+
+let enfocado = null;
+let offsetCam = null;
+const posInicial = camera.position.clone();
+const targetInicial = controls.target.clone();
+const vWorld = new THREE.Vector3();
+
+function aplicarVisibilidad() {
+  base.solMesh.visible = enfocado === null || enfocado === "sol";
+  base.tierra.visible = enfocado === null || enfocado === "tierra";
+  base.luna.visible = enfocado === null || enfocado === "luna";
+  base.orbitas.forEach((o) => (o.visible = enfocado === null));
+}
+
+function enfocar(cuerpo) {
+  enfocado = cuerpo;
+  const dist = CUERPOS[cuerpo].distancia;
+  CUERPOS[cuerpo].objeto.getWorldPosition(vWorld);
+  offsetCam = new THREE.Vector3()
+    .subVectors(camera.position, vWorld)
+    .normalize()
+    .multiplyScalar(dist);
+  aplicarVisibilidad();
+  if (gauges.foco) gauges.foco.textContent = NOMBRES[cuerpo];
+}
+
+function salirDeEnfoque() {
+  enfocado = null;
+  offsetCam = null;
+  aplicarVisibilidad();
+  if (gauges.foco) gauges.foco.textContent = "General";
+}
+
+const ray = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+const canvas = renderer.domElement;
+canvas.addEventListener("pointerdown", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  ray.setFromCamera(pointer, camera);
+  const hits = ray.intersectObjects([base.solMesh, base.tierra, base.luna], true);
+  if (hits.length > 0) {
+    const cuerpo = hits[0].object.userData.cuerpo;
+    if (cuerpo) enfocar(cuerpo);
+  } else if (enfocado) {
+    salirDeEnfoque();
+  }
+});
+
 const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
   if (playing) {
     updateBase(base.sim, base, dt * speed);
+  }
+  if (enfocado) {
+    CUERPOS[enfocado].objeto.updateMatrixWorld(true);
+    CUERPOS[enfocado].objeto.getWorldPosition(vWorld);
+    controls.target.lerp(vWorld, 0.12);
+    camera.position.lerp(vWorld.clone().add(offsetCam), 0.12);
+  } else {
+    controls.target.lerp(targetInicial, 0.08);
+    camera.position.lerp(posInicial, 0.08);
   }
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();

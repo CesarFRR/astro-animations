@@ -1,0 +1,41 @@
+---
+import AnimationLayout from '../../layouts/AnimationLayout.astro';
+---
+<AnimationLayout
+  title="Rotación de la Tierra — Día Sidéreo vs Solar"
+  subtitle="Animación 1 · 1× = 1 día por segundo · Meridiano 0 marcado en rojo"
+  scriptSrc="js/rotacion/main-rotacion.js"
+  phaseTitle="Día sidéreo (23h 56m 04s) vs día solar (24h)"
+  phaseCaption="La Tierra da una vuelta completa sobre su eje en 23 h 56 m 04 s: es el día sidéreo, medido contra las estrellas. Pero mientras gira, avanza casi 1° en su órbita, y el Sol parece haberse movido: la flecha roja tarda 3 m 56 s más en volver a apuntarle. Ese es el día solar. La flecha roja marca el meridiano 0; la blanca apunta a una estrella fija; la amarilla, al Sol."
+>
+  <section class="hud" slot="hud">
+    <div class="gauge">
+      <span class="gauge-label">Día sidéreo</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-value" id="gauge-sider">00:00:00</span>
+    </div>
+    <div class="gauge">
+      <span class="gauge-label">Día solar</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-value" id="gauge-solar">00:00:00</span>
+    </div>
+    <div class="gauge">
+      <span class="gauge-label">Diferencia (solar − sidéreo)</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-value" id="gauge-dif">+0.0 min</span>
+    </div>
+    <div class="gauge">
+      <span class="gauge-label">Giros sidéreos</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-value" id="gauge-giros">0</span>
+    </div>
+  </section>
+
+  <section class="legend" slot="legend">
+    <div class="legend-item"><span class="dot halpha"></span>Meridiano 0</div>
+    <div class="legend-item"><span class="dot gamma"></span>Estrella de referencia</div>
+    <div class="legend-item"><span class="dot accretion"></span>Hacia el Sol</div>
+  </section>
+
+  <button id="btn-restart" class="ctrl-btn" slot="controls">↺ Reiniciar</button>
+</AnimationLayout>

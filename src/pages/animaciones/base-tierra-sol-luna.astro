@@ -6,9 +6,14 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
   subtitle="Piso de entorno · Órbitas reales (Kepler) · Escala: 1 ua = 20 u"
   scriptSrc="js/base/main-base.js"
   phaseTitle="Base del sistema"
-  phaseCaption="La Tierra orbita al Sol en una elipse (e = 0.0167) con el Sol en un foco, girando sobre un eje inclinado 23.44°; la Luna orbita inclinada 5.14° sobre la eclíptica con nodos que regresan cada 18.6 años. Esta es la base sobre la que se construyen las animaciones de movimientos de la Tierra."
+  phaseCaption="La Tierra orbita al Sol en una elipse (e = 0.0167) con el Sol en un foco, girando sobre un eje inclinado 23.44°; la Luna orbita inclinada 5.14° sobre la eclíptica con nodos que regresan cada 18.6 años. Esta es la base sobre la que se construyen las animaciones de movimientos de la Tierra. Haz clic en un cuerpo para enfocarlo y ocultar el resto; clic en el espacio para volver."
 >
   <section class="hud" slot="hud">
+    <div class="gauge">
+      <span class="gauge-label">Enfoque</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 100%"></div></div>
+      <span class="gauge-value" id="gauge-foco">General</span>
+    </div>
     <div class="gauge">
       <span class="gauge-label">Día del año</span>
       <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>

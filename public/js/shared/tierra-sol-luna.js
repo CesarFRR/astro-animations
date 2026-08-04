@@ -30,13 +30,15 @@ export function createBase(scene, opts = {}) {
     a = AU,
     e = E_TIERRA,
     mostrarOrbitas = true,
+    mostrarNubes = true,
     manager = new THREE.LoadingManager(),
+    tierraTextura = null,
   } = opts;
 
   const loader = new THREE.TextureLoader(manager);
   const tex = {
     sol: loader.load(`${BASE}/textures/sun.webp`),
-    tierra: loader.load(`${BASE}/textures/earth_daymap.webp`),
+    tierra: tierraTextura || loader.load(`${BASE}/textures/earth_daymap.webp`),
     nubes: loader.load(`${BASE}/textures/earth_clouds.webp`),
     luna: loader.load(`${BASE}/textures/moon.webp`),
   };
@@ -49,6 +51,7 @@ export function createBase(scene, opts = {}) {
     new THREE.SphereGeometry(solRadio, 64, 48),
     new THREE.MeshBasicMaterial({ map: tex.sol })
   );
+  solMesh.userData.cuerpo = "sol";
   sol.add(solMesh);
   scene.add(sol);
 
@@ -69,6 +72,7 @@ export function createBase(scene, opts = {}) {
       shininess: 12,
     })
   );
+  tierraMesh.userData.cuerpo = "tierra";
   tierraSpin.add(tierraMesh);
   const nubesMesh = new THREE.Mesh(
     tierraGeo,
@@ -80,7 +84,9 @@ export function createBase(scene, opts = {}) {
       depthWrite: false,
     })
   );
+  nubesMesh.userData.cuerpo = "tierra";
   nubesMesh.scale.setScalar(1.02);
+  nubesMesh.visible = mostrarNubes;
   tierraSpin.add(nubesMesh);
   tierraTilt.add(tierraSpin);
   tierra.add(tierraTilt);
@@ -93,6 +99,7 @@ export function createBase(scene, opts = {}) {
     new THREE.SphereGeometry(lunaRadio, 48, 32),
     new THREE.MeshPhongMaterial({ map: tex.luna, shininess: 4 })
   );
+  lunaMesh.userData.cuerpo = "luna";
   luna.add(lunaMesh);
   lunaOrbita.add(luna);
   tierra.add(lunaOrbita);
@@ -138,7 +145,7 @@ export function createBase(scene, opts = {}) {
     distLuna,
   };
 
-  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, sim, tex, manager };
+  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, sim, tex, manager, solRadio, tierraRadio, lunaRadio };
 }
 
 export function updateBase(sim, refs, dt) {

@@ -51,6 +51,16 @@ export const animations: Animation[] = [
     duration: '∞'
   },
   {
+    id: 'rotacion-tierra',
+    title: 'Rotación — Día Sidéreo vs Solar',
+    description: 'Una vuelta sobre el eje dura 23h 56m 04s (día sidéreo), pero el Sol tarda 3m 56s más en volver al mismo meridiano: el día solar de 24h. Dos relojes miden los cruces en vivo.',
+    category: 'sistema-solar',
+    tags: ['Rotación', 'Día sidéreo', 'Día solar'],
+    thumbnail: '/thumbnails/rotacion-tierra.jpg',
+    difficulty: 'basico',
+    duration: '3-5 min'
+  },
+  {
     id: 'crab-pulsar',
     title: 'Púlsar del Cangrejo (PSR B0531+21)',
     description: 'El corazón de la Nebulosa del Cangrejo, una estrella de neutrones que gira 30 veces por segundo, nacida de la supernova SN 1054.',
