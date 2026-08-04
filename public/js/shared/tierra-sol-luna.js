@@ -280,8 +280,9 @@ export function crearTierraSola(scene, opts = {}) {
   tierraSpin.add(nubes);
   tierraTilt.add(tierraSpin);
   tierra.add(tierraTilt);
+  scene.add(tierra);
 
-  const luz = new THREE.PointLight(0xfff1d0, 50, 300, 1);
+  const luz = new THREE.PointLight(0xfff1d0, 30, 300, 1);
   luz.position.set(30, 15, 25);
   scene.add(luz);
   scene.add(new THREE.AmbientLight(0x223355, 0.35));
@@ -330,7 +331,7 @@ export function crearLunaSola(scene, opts = {}) {
   );
   scene.add(luna);
 
-  const luz = new THREE.PointLight(0xffffff, 45, 250, 1);
+  const luz = new THREE.PointLight(0xffffff, 30, 250, 1);
   luz.position.set(15, 10, 20);
   scene.add(luz);
   scene.add(new THREE.AmbientLight(0x223355, 0.4));
