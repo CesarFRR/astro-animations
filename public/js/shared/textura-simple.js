@@ -1,5 +1,22 @@
 import * as THREE from "three";
 
+const BASE = "/astro-animations";
+
+export function cargarTexturasSimples(manager) {
+  const loader = new THREE.TextureLoader(manager);
+  const tex = {
+    dia: loader.load(`${BASE}/textures/simple/earth_day.webp`),
+    bump: loader.load(`${BASE}/textures/simple/earth_bump.webp`),
+    specular: loader.load(`${BASE}/textures/simple/earth_specular.webp`),
+    luces: loader.load(`${BASE}/textures/simple/earth_lights.webp`),
+    nubes: loader.load(`${BASE}/textures/simple/earth_clouds.webp`),
+    nubesAlpha: loader.load(`${BASE}/textures/simple/earth_clouds_alpha.webp`),
+  };
+  tex.dia.colorSpace = THREE.SRGBColorSpace;
+  tex.luces.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 export function crearTexturaTierraSimple() {
   const W = 1024;
   const H = 512;

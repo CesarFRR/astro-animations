@@ -19,7 +19,7 @@ npm run generate   # scaffolding para nueva animación
 
 ---
 
-## Lo que hay ahora (5 animaciones)
+## Lo que hay ahora (7 animaciones)
 
 | Animación | Tipo | Estado |
 |---|---|---|
@@ -28,6 +28,8 @@ npm run generate   # scaffolding para nueva animación
 | Gigante Roja → Enana Blanca | estrella | ✅ Completa |
 | Púlsar del Cangrejo (PSR B0531+21) | pulsar | ✅ Completa |
 | Púlsar de Vela (PSR B0833-45) | pulsar | ✅ Completa |
+| Sistema Tierra–Sol–Luna (Base) | sistema-solar | ✅ Completa (clic-para-enfocar incluido) |
+| Rotación — Día Sidéreo vs Solar | sistema-solar | ✅ Completa |
 
 ---
 
@@ -60,17 +62,18 @@ cada animación explica un movimiento concreto. Fuente del contenido:
 
 - Reutilizar `public/js/shared/setup.js` (escena + bloom + OrbitControls) y `public/js/shared/starfield.js`.
 - **Órbitas reales (opcional):** portar ideas de `sistema_solar/` (jsorrery): VSOP87 para la Tierra, ELP-2000/82B para la Luna, inclinación 23°26'21", precesión del eje en `getTilt()` (25,800 años), nodos lunares con avance de 360°/18.6 años. Para fines educativos basta Kepler simplificado + corrección de nodos.
-- **Texturas:** descargar desde Solar System Scope / NASA Visible Earth a `public/textures/` en **2K** (nunca 8K). Para conceptos con muchos overlays (5, 6, 7): textura simple 1K o color sólido — el foco es la explicación, no el render.
+- **Texturas:** descargar desde Solar System Scope / NASA Visible Earth a `public/textures/` en **2K** (nunca 8K). Para conceptos con muchos overlays (5, 6, 7): usar la **tierra simple real 1K** de `public/textures/simple/` (set de Three.js Journey, 6 webp: día 55KB, bump, specular, luces nocturnas, nubes, nubes-alpha + sprite de estrella) — el foco es la explicación, no el render. Cargador: `cargarTexturasSimples(manager)` en `public/js/shared/textura-simple.js`. La textura procedural (cuadrícula + meridiano rojo) queda para la rotación.
 - **Plantillas solo como referencia visual/técnica** (iluminación de eyes-nasa, layers, astronomía de jsorrery). No copiar código minificado.
 
 ### Pendientes de esta serie
 
 - [x] Descargar texturas (Solar System Scope, CC BY 4.0) → `public/textures/` en WebP
 - [x] Atmósfera fresnel (halo azul día / crepúsculo naranja) — portada del ejemplo oficial three.js `webgpu_tsl_earth` (Three.js Journey + SSS). `ShaderMaterial` GLSL ~30 líneas, opción `atmosfera: false` para desactivarla
+- [x] Clic-para-enfocar en la base: `visible=false` al resto + cámara con lerp (raycaster por `userData.cuerpo`)
+- [x] Animación 1: rotación (sidéreo vs solar) → `rotacion-tierra`
+- [x] Assets Tierra simple 1K (set Three.js Journey) → `public/textures/simple/*.webp` (1.1MB JPG → 328KB)
 - [ ] Crear módulo compartido `public/js/shared/orbits.js` (Kepler + VSOP simplificado + elementos de la Luna)
 - [ ] Crear módulo compartido `public/js/shared/esfera-celeste.js` (líneas eclíptica/ecuador/polos para 5 y 7)
-- [ ] **Clic-para-enfocar** en la base (ver sección Optimización): `visible=false` al resto + prefetch de textura
-- [ ] Animación 1: rotación (sidéreo vs solar)
 - [ ] Animación 2: traslación (perihelio/afelio)
 - [ ] Animación 3: estaciones
 - [ ] Animación 4: eclipses
@@ -136,6 +139,7 @@ internamente); no "desrenderiza" nada. Lo que sí funciona:
 | `earth-revolutions-around-sun` | Derivado jsorrery (escenarios Apolo/NEO) | Escenarios orbitales reales (elementos osculantes, misiones) |
 | `theskylive-solar-system` | TheSkyLive | Posiciones en tiempo real (referencia de datos) |
 | `seasons-earth`, `solar-time` | Conceptos estaciones/tiempo solar | Guion educativo (referencia de contenido) |
+| `threejs-example-earth-webgpu.html` | Ejemplo oficial three.js (TSL/WebGPU, Three.js Journey) | **Atmósfera fresnel** (portada a GLSL en `createBase`) + origen del set de texturas 1K en `simple/` |
 
 ---
 
