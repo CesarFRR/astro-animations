@@ -13,6 +13,36 @@ const TILT_ECLIPTICA = (23.44 * Math.PI) / 180;
 const INCLINACION_LUNAR = (5.14 * Math.PI) / 180;
 const E_TIERRA = 0.0167;
 
+const ATM_DIA = new THREE.Color(0x4db2ff);
+const ATM_CREPUSCULO = new THREE.Color(0xbc490b);
+
+const ATM_VERTEX = /* glsl */ `
+  varying vec3 vNormalW;
+  varying vec3 vViewDir;
+  void main() {
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vNormalW = normalize(mat3(modelMatrix) * normal);
+    vViewDir = normalize(cameraPosition - wp.xyz);
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`;
+
+const ATM_FRAGMENT = /* glsl */ `
+  uniform vec3 uSunDir;
+  uniform vec3 uDayColor;
+  uniform vec3 uTwilightColor;
+  varying vec3 vNormalW;
+  varying vec3 vViewDir;
+  void main() {
+    float fresnel = 1.0 - abs(dot(normalize(vNormalW), normalize(vViewDir)));
+    float sunOrient = dot(normalize(vNormalW), normalize(uSunDir));
+    vec3 atmosColor = mix(uTwilightColor, uDayColor, smoothstep(-0.25, 0.75, sunOrient));
+    float alpha = pow(clamp(1.0 - (fresnel - 0.73) / 0.27, 0.0, 1.0), 3.0)
+      * smoothstep(-0.5, 1.0, sunOrient);
+    gl_FragColor = vec4(atmosColor, alpha);
+  }
+`;
+
 function kepler(M, e) {
   let E = M;
   for (let i = 0; i < 6; i++) {
@@ -31,6 +61,7 @@ export function createBase(scene, opts = {}) {
     e = E_TIERRA,
     mostrarOrbitas = true,
     mostrarNubes = true,
+    atmosfera = true,
     manager = new THREE.LoadingManager(),
     tierraTextura = null,
   } = opts;
@@ -90,6 +121,29 @@ export function createBase(scene, opts = {}) {
   tierraSpin.add(nubesMesh);
   tierraTilt.add(tierraSpin);
   tierra.add(tierraTilt);
+
+  let atmosferaMesh = null;
+  if (atmosfera) {
+    atmosferaMesh = new THREE.Mesh(
+      tierraGeo,
+      new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        transparent: true,
+        depthWrite: false,
+        uniforms: {
+          uSunDir: { value: new THREE.Vector3(1, 0, 0) },
+          uDayColor: { value: ATM_DIA.clone() },
+          uTwilightColor: { value: ATM_CREPUSCULO.clone() },
+        },
+        vertexShader: ATM_VERTEX,
+        fragmentShader: ATM_FRAGMENT,
+      })
+    );
+    atmosferaMesh.userData.cuerpo = "tierra";
+    atmosferaMesh.scale.setScalar(1.04);
+    tierra.add(atmosferaMesh);
+  }
+
   scene.add(tierra);
 
   const lunaOrbita = new THREE.Group();
@@ -145,7 +199,7 @@ export function createBase(scene, opts = {}) {
     distLuna,
   };
 
-  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, sim, tex, manager, solRadio, tierraRadio, lunaRadio };
+  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, atmosfera: atmosferaMesh, sim, tex, manager, solRadio, tierraRadio, lunaRadio };
 }
 
 export function updateBase(sim, refs, dt) {
@@ -170,6 +224,13 @@ export function updateBase(sim, refs, dt) {
   );
 
   refs.sol.rotation.y += (TAU * dt) / 25.05;
+
+  if (refs.atmosfera) {
+    refs.atmosfera.material.uniforms.uSunDir.value
+      .copy(refs.sol.position)
+      .sub(refs.tierra.position)
+      .normalize();
+  }
 }
 
 export function distanciaTierraSol(sim, a) {

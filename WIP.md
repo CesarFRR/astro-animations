@@ -66,6 +66,7 @@ cada animación explica un movimiento concreto. Fuente del contenido:
 ### Pendientes de esta serie
 
 - [x] Descargar texturas (Solar System Scope, CC BY 4.0) → `public/textures/` en WebP
+- [x] Atmósfera fresnel (halo azul día / crepúsculo naranja) — portada del ejemplo oficial three.js `webgpu_tsl_earth` (Three.js Journey + SSS). `ShaderMaterial` GLSL ~30 líneas, opción `atmosfera: false` para desactivarla
 - [ ] Crear módulo compartido `public/js/shared/orbits.js` (Kepler + VSOP simplificado + elementos de la Luna)
 - [ ] Crear módulo compartido `public/js/shared/esfera-celeste.js` (líneas eclíptica/ecuador/polos para 5 y 7)
 - [ ] **Clic-para-enfocar** en la base (ver sección Optimización): `visible=false` al resto + prefetch de textura
