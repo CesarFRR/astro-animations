@@ -87,6 +87,12 @@ export function createBase(scene, opts = {}) {
   scene.add(sol);
 
   const solLight = new THREE.PointLight(0xfff1d0, 900, 0, 2);
+  solLight.castShadow = true;
+  solLight.shadow.mapSize.set(2048, 2048);
+  solLight.shadow.camera.near = 14;
+  solLight.shadow.camera.far = 26;
+  solLight.shadow.bias = -0.0005;
+  solLight.shadow.normalBias = 0.02;
   scene.add(solLight);
   const relleno = new THREE.PointLight(0xffffff, 0.45, 0, 0);
   scene.add(relleno);
@@ -106,6 +112,8 @@ export function createBase(scene, opts = {}) {
     })
   );
   tierraMesh.userData.cuerpo = "tierra";
+  tierraMesh.castShadow = true;
+  tierraMesh.receiveShadow = true;
   tierraSpin.add(tierraMesh);
   const nubesMesh = new THREE.Mesh(
     tierraGeo,
@@ -119,6 +127,7 @@ export function createBase(scene, opts = {}) {
   );
   nubesMesh.userData.cuerpo = "tierra";
   nubesMesh.scale.setScalar(1.02);
+  nubesMesh.receiveShadow = true;
   nubesMesh.visible = mostrarNubes;
   tierraSpin.add(nubesMesh);
   tierraTilt.add(tierraSpin);
@@ -156,6 +165,8 @@ export function createBase(scene, opts = {}) {
     new THREE.MeshPhongMaterial({ map: tex.luna, shininess: 4 })
   );
   lunaMesh.userData.cuerpo = "luna";
+  lunaMesh.castShadow = true;
+  lunaMesh.receiveShadow = true;
   luna.add(lunaMesh);
   lunaOrbita.add(luna);
   tierra.add(lunaOrbita);
