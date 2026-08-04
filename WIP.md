@@ -31,6 +31,66 @@ npm run generate   # scaffolding para nueva animación
 
 ---
 
+## ⚙️ Workflow del repo
+
+- **Solo commits locales.** Nada de `git push` ni `npm run deploy` salvo que se pida explícitamente.
+- Los fuentes de referencia descargados viven en `ejemplos-proyectos-comunidad/` (no se versionan análisis de repos ajenos).
+
+---
+
+## 🌍 Serie Tierra–Sol–Luna (movimientos de la Tierra)
+
+Sobre una base de sistema Tierra–Sol–Luna (texturas reales 2K, órbitas correctas),
+cada animación explica un movimiento concreto. Fuente del contenido:
+`ejemplos-proyectos-comunidad/Movimientos de la Tierra - Wikipedia.pdf`.
+
+| # | Animación | Concepto | Datos clave (PDF) | Textura Tierra | Dificultad |
+|---|---|---|---|---|---|
+| 1 | `rotacion-dia` | Rotación: día sidéreo vs solar | 23h 56m 4.1s (estrellas) vs 24h (Sol); giro O→E, levógiro visto desde el polo norte; +3m56s por el avance orbital | media (2K) | baja |
+| 2 | `traslacion-orbita` | Traslación elíptica | 365d 5h 48m 45s (año tropical); elipse de 930M km, e≈0.0167; perihelio ~3 ene (147.5M km), afelio ~4 jul (152.6M km); 106,200 km/h (29.5 km/s); Sol en un foco (Kepler) | media (2K) | baja |
+| 3 | `estaciones` | Oblicuidad de la eclíptica (23.5°) | Ángulo de incidencia + horas de luz → estaciones; meses de luz/oscuridad en los polos; solsticios y equinoccios | media (2K, con líneas de trópicos/ecuador) | media |
+| 4 | `eclipses` | Eclipse solar y lunar | Nodos de la órbita lunar (i=5.16°); umbra/penumbra; eclipse solar (Luna entre Sol y Tierra) y lunar (Tierra entre Sol y Luna) | simple (1K, sin satélite) + sombras | media-alta |
+| 5 | `precesion-nutacion` | Precesión de los equinoccios + nutación + Chandler | Precesión: 25,772 años, levógira, cono del eje; nutación: 18.6 años, ~9", 1,385 bucles por vuelta (Bradley); Chandler: 0.7", 433 días (1891) | simple (1K) + esfera celeste con líneas | alta |
+| 6 | `ciclos-milankovic` | Variaciones orbitales | Oblicuidad 22.1°–24.5°; excentricidad; precesión del perihelio (3.84"/siglo, ~112,000 años); insolación a 65°N (sedimentos marinos/Vostok) | simple (1K) | media-alta |
+| 7 | `coordenadas-ecuatoriales` | Sistema de coordenadas ecuatoriales | Esfera celeste: ecuador celeste, eclíptica (oblicuidad), polos celestes, AR/Dec, meridiano, horizonte del observador | **simple** (color/plano, sin detalles — el foco son las líneas) | media |
+
+**Prioridad sugerida:** 1 → 2 → 3 → 4 → 7 → 5 → 6 (de lo simple a lo complejo; 7 necesita la esfera celeste que ya se construye en 5).
+
+### Base técnica común
+
+- Reutilizar `public/js/shared/setup.js` (escena + bloom + OrbitControls) y `public/js/shared/starfield.js`.
+- **Órbitas reales (opcional):** portar ideas de `sistema_solar/` (jsorrery): VSOP87 para la Tierra, ELP-2000/82B para la Luna, inclinación 23°26'21", precesión del eje en `getTilt()` (25,800 años), nodos lunares con avance de 360°/18.6 años. Para fines educativos basta Kepler simplificado + corrección de nodos.
+- **Texturas:** descargar desde Solar System Scope / NASA Visible Earth a `public/textures/` en **2K** (nunca 8K). Para conceptos con muchos overlays (5, 6, 7): textura simple 1K o color sólido — el foco es la explicación, no el render.
+- **Plantillas solo como referencia visual/técnica** (iluminación de eyes-nasa, layers, astronomía de jsorrery). No copiar código minificado.
+
+### Pendientes de esta serie
+
+- [ ] Descargar texturas (Tierra 2K, Luna 2K, Sol 2K + textura simple) a `public/textures/`
+- [ ] Crear módulo compartido `public/js/shared/orbits.js` (Kepler + VSOP simplificado + elementos de la Luna)
+- [ ] Crear módulo compartido `public/js/shared/esfera-celeste.js` (líneas eclíptica/ecuador/polos para 5 y 7)
+- [ ] Animación 1: rotación (sidéreo vs solar)
+- [ ] Animación 2: traslación (perihelio/afelio)
+- [ ] Animación 3: estaciones
+- [ ] Animación 4: eclipses
+- [ ] Animación 7: coordenadas ecuatoriales
+- [ ] Animación 5: precesión + nutación + Chandler
+- [ ] Animación 6: ciclos de Milanković
+
+---
+
+## Plantillas de referencia (`ejemplos-proyectos-comunidad/`)
+
+| Carpeta | Qué es | Qué aporta |
+|---|---|---|
+| `eyes-nasa-*` (earth, moon, sun, all-solar-system) | NASA Eyes on the Solar System (F12 dump) | **Calidad visual**: capas/layers, iluminación, texturas, entidades; lag inicial por cantidad de elementos |
+| `solarSystemScope-*` (earth, all-solar-system) | Solar System Scope (Three.js minificado) | Texturas estilo y render planetario atractivo |
+| `sistema_solar` (jsorrery) | JSOrrery (Three.js, mvezina) | **Astronomía real**: VSOP87 (Tierra), ELP-2000 (Luna), elementos orbitales por cuerpo, tilt + precesión, nodos lunares 18.6 años, ΔT |
+| `earth-revolutions-around-sun` | Derivado jsorrery (escenarios Apolo/NEO) | Escenarios orbitales reales (elementos osculantes, misiones) |
+| `theskylive-solar-system` | TheSkyLive | Posiciones en tiempo real (referencia de datos) |
+| `seasons-earth`, `solar-time` | Conceptos estaciones/tiempo solar | Guion educativo (referencia de contenido) |
+
+---
+
 ## Pendientes / Bugs conocidos
 
 - [ ] `public/js/main.js` (Supernova) tiene lógica duplicada con `src/scripts/supernova-pares.ts`
