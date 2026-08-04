@@ -88,7 +88,9 @@ export function createBase(scene, opts = {}) {
 
   const solLight = new THREE.PointLight(0xfff1d0, 900, 0, 2);
   scene.add(solLight);
-  scene.add(new THREE.AmbientLight(0x223355, 0.25));
+  const relleno = new THREE.PointLight(0xffffff, 0.45, 0, 0);
+  scene.add(relleno);
+  scene.add(new THREE.AmbientLight(0x223355, 0.35));
 
   const tierra = new THREE.Group();
   const tierraTilt = new THREE.Group();
@@ -199,7 +201,7 @@ export function createBase(scene, opts = {}) {
     distLuna,
   };
 
-  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, atmosfera: atmosferaMesh, sim, tex, manager, solRadio, tierraRadio, lunaRadio };
+  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, atmosfera: atmosferaMesh, sim, tex, manager, solRadio, tierraRadio, lunaRadio, relleno };
 }
 
 export function updateBase(sim, refs, dt) {

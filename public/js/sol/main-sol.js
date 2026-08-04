@@ -55,12 +55,19 @@ scene.add(glow);
 
 const sim = { dias: 0 };
 let playing = true;
+let rotar = false;
 let speed = 1;
 const playBtn = document.getElementById("btn-play");
+const rotarBtn = document.getElementById("btn-rotar");
 const speedSelect = document.getElementById("speed");
 playBtn.addEventListener("click", () => {
   playing = !playing;
   playBtn.textContent = playing ? "⏸ Pausar" : "▶ Reproducir";
+});
+rotarBtn.addEventListener("click", () => {
+  rotar = !rotar;
+  rotarBtn.textContent = rotar ? "⟳ Girar (ON)" : "⟳ Girar (OFF)";
+  rotarBtn.classList.toggle("muted", !rotar);
 });
 speedSelect.addEventListener("change", (e) => {
   speed = parseFloat(e.target.value);
@@ -70,7 +77,7 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
-  if (playing) {
+  if (playing && rotar) {
     sim.dias += dt * speed;
     sol.rotation.y = (TAU * sim.dias) / 25.05;
   }

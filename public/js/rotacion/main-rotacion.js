@@ -149,6 +149,7 @@ function animate() {
   if (playing) {
     updateBase(base.sim, base, dt * speed);
   }
+  base.relleno.position.copy(camera.position);
 
   vTierra.copy(base.tierra.position);
   vSol.copy(base.sol.position).sub(vTierra).normalize();

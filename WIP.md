@@ -247,6 +247,22 @@ Inspiral + merger + ringdown con ondas gravitacionales.
 - **Feature:** Onda gravitacional en espacio-tiempo deformado, GW chirp
 - **Dificultad:** muy alta
 
+### 11. 🔪 Capas internas de cuerpos (rebanadas en tiempo real)
+Botón que revela cortes transversales de Tierra/Luna/Sol mostrando sus capas
+(corteza/manto/núcleo, regolito, fotosfera/radiación/convulsión) — "slices" 3D
+tipo anatomical view. Ideal para las vistas de cuerpo individual (ExplorerLayout).
+
+---
+
+## Iluminación y rotación de los cuerpos individuales (decisión 04-ago)
+
+- **Sin sombras duras**: la luz principal sigue a la cámara (`luz.position.copy(camera.position)`)
+  en Vuelo Libre y Luna — el cuerpo se ve siempre detallado desde cualquier ángulo.
+- **Relleno desde la cámara**: `createBase` tiene `relleno` (PointLight que el main posiciona
+  en la cámara) para que la rotación también muestre la cara visible iluminada.
+- **Rotación OFF por defecto** en los cuerpos individuales; botón `⟳ Girar (ON/OFF)` en la
+  barra de controles (el tiempo avanza solo si está activa).
+
 ---
 
 ## Roadmap técnico
