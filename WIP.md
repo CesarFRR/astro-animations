@@ -19,7 +19,7 @@ npm run generate   # scaffolding para nueva animación
 
 ---
 
-## Lo que hay ahora (7 animaciones)
+## Lo que hay ahora (10 animaciones)
 
 | Animación | Tipo | Estado |
 |---|---|---|
@@ -30,6 +30,14 @@ npm run generate   # scaffolding para nueva animación
 | Púlsar de Vela (PSR B0833-45) | pulsar | ✅ Completa |
 | Sistema Tierra–Sol–Luna (Base) | sistema-solar | ✅ Completa (clic-para-enfocar incluido) |
 | Rotación — Día Sidéreo vs Solar | sistema-solar | ✅ Completa |
+| Tierra — Vuelo Libre | sistema-solar | ✅ Completa (controles tipo Google Earth: WASD + pan + zoom; layout inmersivo `ExplorerLayout` sin widgets) |
+| Sol — La Estrella Madre | sistema-solar | ✅ Completa (bloom + corona sprite procedural) |
+| Luna — Rotación Síncrona | sistema-solar | ✅ Completa |
+
+**Layout inmersivo:** `src/layouts/ExplorerLayout.astro` — solo canvas + top-bar + controles
+(play/velocidad), sin HUD ni widgets. Para animaciones de un solo cuerpo. Los helpers
+`crearTierraSola` / `crearLunaSola` / `updateTierraSola` / `updateLunaSola` viven en
+`tierra-sol-luna.js` (malla 96×64, anisotropy 8, atmósfera fresnel, luz puntual decay 1).
 
 ---
 

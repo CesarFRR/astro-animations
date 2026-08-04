@@ -1,0 +1,63 @@
+---
+const base = "/astro-animations";
+
+export interface Props {
+  title: string;
+  subtitle?: string;
+  scriptSrc: string;
+  navHref?: string;
+  navLabel?: string;
+}
+
+const { title, subtitle = "", scriptSrc, navHref = "/astro-animations/", navLabel = "← Catálogo" } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title} | Astro Animations</title>
+  <link rel="stylesheet" href={`${base}/css/style.css`}>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <canvas id="space-canvas"></canvas>
+
+  <header class="top-bar">
+    <h1>{title}</h1>
+    <div class="subtitle">{subtitle}</div>
+    <a class="nav-link" href={navHref}>{navLabel}</a>
+  </header>
+
+  <section class="controls">
+    <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
+    <slot name="controls" />
+    <div class="speed-control">
+      <label for="speed">Velocidad</label>
+      <select id="speed">
+        <option value="0.1">0.1×</option>
+        <option value="0.25">0.25×</option>
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+        <option value="2.5">2.5×</option>
+        <option value="3">3×</option>
+        <option value="4">4×</option>
+        <option value="5">5×</option>
+        <option value="10">10×</option>
+      </select>
+    </div>
+  </section>
+
+  <slot />
+
+  <script type="module" src={`${base}/${scriptSrc}`}></script>
+</body>
+</html>

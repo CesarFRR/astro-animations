@@ -237,3 +237,107 @@ export function distanciaTierraSol(sim, a) {
   const E = kepler(sim.M, sim.e);
   return a * (1 - sim.e * Math.cos(E));
 }
+
+export function crearTierraSola(scene, opts = {}) {
+  const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true } = opts;
+  const loader = new THREE.TextureLoader(manager);
+  const tex = {
+    tierra: loader.load(`${BASE}/textures/earth_daymap.webp`),
+    nubes: loader.load(`${BASE}/textures/earth_clouds.webp`),
+  };
+  tex.tierra.colorSpace = THREE.SRGBColorSpace;
+  tex.tierra.anisotropy = 8;
+  tex.nubes.colorSpace = THREE.SRGBColorSpace;
+  tex.nubes.anisotropy = 8;
+
+  const tierra = new THREE.Group();
+  const tierraTilt = new THREE.Group();
+  tierraTilt.rotation.z = TILT_ECLIPTICA;
+  const tierraSpin = new THREE.Group();
+  const geo = new THREE.SphereGeometry(radio, 96, 64);
+  const mesh = new THREE.Mesh(
+    geo,
+    new THREE.MeshPhongMaterial({
+      map: tex.tierra,
+      specular: new THREE.Color(0x444455),
+      shininess: 12,
+    })
+  );
+  tierraSpin.add(mesh);
+  const nubes = new THREE.Mesh(
+    geo,
+    new THREE.MeshPhongMaterial({
+      map: tex.nubes,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+  );
+  nubes.scale.setScalar(1.02);
+  tierraSpin.add(nubes);
+  tierraTilt.add(tierraSpin);
+  tierra.add(tierraTilt);
+
+  const luz = new THREE.PointLight(0xfff1d0, 50, 300, 1);
+  luz.position.set(30, 15, 25);
+  scene.add(luz);
+  scene.add(new THREE.AmbientLight(0x223355, 0.35));
+
+  let atmosferaMesh = null;
+  if (atmosfera) {
+    const dirSol = luz.position.clone().normalize();
+    atmosferaMesh = new THREE.Mesh(
+      geo,
+      new THREE.ShaderMaterial({
+        side: THREE.BackSide,
+        transparent: true,
+        depthWrite: false,
+        uniforms: {
+          uSunDir: { value: dirSol },
+          uDayColor: { value: ATM_DIA.clone() },
+          uTwilightColor: { value: ATM_CREPUSCULO.clone() },
+        },
+        vertexShader: ATM_VERTEX,
+        fragmentShader: ATM_FRAGMENT,
+      })
+    );
+    atmosferaMesh.scale.setScalar(1.04);
+    tierra.add(atmosferaMesh);
+  }
+
+  const sim = { dias: 0 };
+  return { tierra, tierraTilt, tierraSpin, nubes, atmosfera: atmosferaMesh, luz, sim, tex, manager, radio };
+}
+
+export function updateTierraSola(sim, refs, dt) {
+  sim.dias += dt;
+  refs.tierraSpin.rotation.y = (TAU * sim.dias) / DIA_SIDEREO;
+}
+
+export function crearLunaSola(scene, opts = {}) {
+  const { radio = 0.6, manager = new THREE.LoadingManager() } = opts;
+  const loader = new THREE.TextureLoader(manager);
+  const tex = { luna: loader.load(`${BASE}/textures/moon.webp`) };
+  tex.luna.colorSpace = THREE.SRGBColorSpace;
+  tex.luna.anisotropy = 8;
+
+  const luna = new THREE.Mesh(
+    new THREE.SphereGeometry(radio, 64, 48),
+    new THREE.MeshPhongMaterial({ map: tex.luna, shininess: 4 })
+  );
+  scene.add(luna);
+
+  const luz = new THREE.PointLight(0xffffff, 45, 250, 1);
+  luz.position.set(15, 10, 20);
+  scene.add(luz);
+  scene.add(new THREE.AmbientLight(0x223355, 0.4));
+
+  const sim = { dias: 0 };
+  return { luna, luz, sim, tex, manager, radio };
+}
+
+export function updateLunaSola(sim, refs, dt) {
+  sim.dias += dt;
+  refs.luna.rotation.y = (TAU * sim.dias) / MES_SIDEREO;
+}

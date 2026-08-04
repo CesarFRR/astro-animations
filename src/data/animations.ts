@@ -61,6 +61,36 @@ export const animations: Animation[] = [
     duration: '3-5 min'
   },
   {
+    id: 'tierra-libre',
+    title: 'Tierra — Vuelo Libre',
+    description: 'La Tierra a solas, en alta calidad: atmósfera, nubes y rotación sidérea. Controles tipo Google Earth: orbita, desplázate con WASD y acércate hasta la superficie.',
+    category: 'sistema-solar',
+    tags: ['Controles Google Earth', 'Atmósfera fresnel', 'Rotación'],
+    thumbnail: '/thumbnails/tierra-libre.jpg',
+    difficulty: 'basico',
+    duration: '∞'
+  },
+  {
+    id: 'sol-estudio',
+    title: 'Sol — La Estrella Madre',
+    description: 'El Sol a solas con su corona: la fotosfera gira en ~25 días y el halo surge del bloom. Ideal para presentar la estrella de nuestro sistema.',
+    category: 'sistema-solar',
+    tags: ['Fotosfera', 'Rotación 25 días', 'Corona'],
+    thumbnail: '/thumbnails/sol-estudio.jpg',
+    difficulty: 'basico',
+    duration: '∞'
+  },
+  {
+    id: 'luna-estudio',
+    title: 'Luna — Rotación Síncrona',
+    description: 'La Luna a solas: gira sobre sí misma en 27.3 días, el mismo tiempo que tarda en orbitar la Tierra. Por eso siempre vemos la misma cara.',
+    category: 'sistema-solar',
+    tags: ['Rotación síncrona', 'Mes sidéreo', 'Relieve'],
+    thumbnail: '/thumbnails/luna-estudio.jpg',
+    difficulty: 'basico',
+    duration: '∞'
+  },
+  {
     id: 'crab-pulsar',
     title: 'Púlsar del Cangrejo (PSR B0531+21)',
     description: 'El corazón de la Nebulosa del Cangrejo, una estrella de neutrones que gira 30 veces por segundo, nacida de la supernova SN 1054.',
