@@ -1,21 +1,26 @@
-<!--
-  THESIS: El catálogo es la página. Sin hero que robe atención. El visitante ve
-  inmediatamente las tarjetas de animaciones ordenadas en grid, con thumbnails
-  y metadata, y entiende de qué va el proyecto por la estructura misma del catálogo.
+  <!--
+    THESIS: El catálogo es la página. Sin hero que robe atención. El visitante ve
+    inmediatamente las tarjetas de animaciones ordenadas en grid, con thumbnails
+    y metadata, y entiende de qué va el proyecto por la estructura misma del catálogo.
 
-  OWN-WORLD: Fondo oscuro espacial (#05070a) con acento azul NASA (#4facfe).
-  Tipografía sistema limpia. Starfield Three.js como textura ambiental de fondo.
+    OWN-WORLD: Fondo oscuro espacial (#05070a) con acento azul NASA (#4facfe).
+    Tipografía sistema limpia. Starfield Three.js como textura ambiental de fondo.
 
-  STORY: El visitante llega, ve un grid de tarjetas con thumbnails estilo YouTube,
-  filtra por categoría, hace clic en una animación y entra a la experiencia 3D.
+    STORY: El visitante llega, ve un grid de tarjetas con thumbnails estilo YouTube,
+    filtra por categoría, hace clic en una animación y entra a la experiencia 3D.
 
-  FIRST VIEWPORT: Top bar compacta (logo + search). Grid de tarjetas con thumbnail
-  16:9, título, categoría y tags. Filtros como píldoras.
-  Starfield animado de fondo sutil.
+    FIRST VIEWPORT: Top bar compacta (logo + search). Grid de tarjetas con thumbnail
+    16:9, título, categoría y tags. Filtros como píldoras.
+    Starfield animado de fondo sutil.
 
-  FORM: YouTube-grid sobre lienzo NASA. Catálogo clásico con thumbnails.
--->
-<!DOCTYPE html>
+    FORM: YouTube-grid sobre lienzo NASA. Catálogo clásico con thumbnails.
+  -->
+  ---
+  import { animations, categories } from '../data/animations';
+  const animationsJson = JSON.stringify(animations);
+  const categoriesJson = JSON.stringify(categories);
+  ---
+  <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -313,13 +318,7 @@
       <h2 class="section-heading">Catálogo de animaciones</h2>
       <p class="section-desc">Simulaciones 3D interactivas de fenómenos astrofísicos. Explora, orbita y aprende.</p>
 
-      <div class="filters" id="filters">
-        <button class="filter-btn active" data-category="todas">🌌 Todas</button>
-        <button class="filter-btn" data-category="supernova">💥 Supernovas</button>
-        <button class="filter-btn" data-category="estrella">⭐ Estrellas</button>
-        <button class="filter-btn" data-category="agujero-negro">🕳️ Agujeros Negros</button>
-        <button class="filter-btn" data-category="pulsar">💫 Púlsares</button>
-      </div>
+      <div class="filters" id="filters"></div>
 
       <div class="animation-grid" id="grid"></div>
     </main>
@@ -357,31 +356,34 @@
     })();
 
     // ---- Data ----
-    const animations = [
-      { id:"supernova-pares", title:"Supernova de Inestabilidad de Pares", cat:"supernova", diff:"avanzado", tags:["Núcleo masivo","Pares e⁻e⁺","Destrucción total"], icon:"💥" },
-      { id:"agujero-negro", title:"Supernova que deja un Agujero Negro", cat:"agujero-negro", diff:"avanzado", tags:["Colapso gravitatorio","Jets relativistas","Disco de acreción"], icon:"🕳️" },
-      { id:"enana-blanca", title:"De Gigante Roja a Enana Blanca", cat:"estrella", diff:"basico", tags:["Estrella tipo solar","Nebulosa planetaria","Secuencia principal"], icon:"⭐" },
-      { id:"crab-pulsar", title:"Púlsar del Cangrejo (PSR B0531+21)", cat:"pulsar", diff:"intermedio", tags:["Estrella de neutrones","Resto de supernova","Audio 3D"], icon:"💫" },
-      { id:"pulsar-vela", title:"Púlsar de Vela (PSR B0833-45)", cat:"pulsar", diff:"intermedio", tags:["Estrella de neutrones","Rotación extrema","Audio 3D"], icon:"💫" },
-    ];
+    const animations = ${animationsJson};
+    const categories = ${categoriesJson};
+    const iconDe = (cat) => categories.find((c) => c.id === cat)?.icon || "🌌";
+    const nombreDe = (cat) => categories.find((c) => c.id === cat)?.name || cat;
+
+    // ---- Filtros ----
+    const filters = document.getElementById("filters");
+    filters.innerHTML = categories
+      .map((c, i) => `<button class="filter-btn${i === 0 ? " active" : ""}" data-category="${c.id}">${c.icon} ${c.name}</button>`)
+      .join("");
 
     // ---- Render grid ----
     const grid = document.getElementById("grid");
     function renderGrid(cat) {
       grid.innerHTML = "";
-      const items = cat === "todas" ? animations : animations.filter(a => a.cat === cat);
+      const items = cat === "todas" ? animations : animations.filter(a => a.category === cat);
       for (const a of items) {
         const card = document.createElement("a");
         card.href = `/astro-animations/animaciones/${a.id}/`;
         card.className = "animation-card";
         card.innerHTML = `
           <div class="card-thumb-wrap">
-            <div class="card-thumb-placeholder">${a.icon}</div>
+            <div class="card-thumb-placeholder">${iconDe(a.category)}</div>
             
           </div>
           <div class="card-body">
             <h3 class="card-title">${a.title}</h3>
-            <span class="card-meta">${a.diff} · ${a.cat}</span>
+            <span class="card-meta">${a.difficulty} · ${nombreDe(a.category)}</span>
             <div class="card-tags">${a.tags.map(t => `<span class="card-tag">${t}</span>`).join("")}</div>
           </div>`;
         grid.appendChild(card);
@@ -390,9 +392,9 @@
     renderGrid("todas");
 
     // ---- Filter logic ----
-    document.querySelectorAll(".filter-btn").forEach(btn => {
+    filters.querySelectorAll(".filter-btn").forEach(btn => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        filters.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         renderGrid(btn.getAttribute("data-category"));
       });
