@@ -11,7 +11,7 @@ const { renderer, scene, camera, controls, composer } = createScene({
   bloomRadius: 0.6,
   bloomThreshold: 0.1,
   fogDensity: 0.004,
-  cameraPos: [16, 12, 36],
+  cameraPos: [5.5, 3.4, 9],
 });
 
 const sf = createStarfield(scene, 4000, 60, 500);
@@ -92,24 +92,17 @@ const gauges = {
   sider: document.getElementById("gauge-sider"),
   solar: document.getElementById("gauge-solar"),
   dif: document.getElementById("gauge-dif"),
-  giros: document.getElementById("gauge-giros"),
 };
-const label = (span) => span.parentElement.querySelector(".gauge-label");
-const fill = (span) => span.parentElement.querySelector(".gauge-fill");
+const em = (span) => span.parentElement.querySelector(".gauge-label em");
 
 function actualizarHUD() {
   if (!gauges.sider) return;
   const relojSider = (base.sim.dias - estado.inicioSidereo) * 24;
   const relojSolar = (base.sim.dias - estado.inicioSolar) * 24;
   gauges.sider.textContent = fmtHoras(relojSider);
-  fill(gauges.sider).style.width = `${Math.min(100, (relojSider / 24) * 100)}%`;
   gauges.solar.textContent = fmtHoras(relojSolar);
-  fill(gauges.solar).style.width = `${Math.min(100, (relojSolar / 24) * 100)}%`;
   const difMin = (estado.totalSolarH - estado.totalSidereoH) * 60;
   gauges.dif.textContent = `+${difMin.toFixed(1)} min`;
-  fill(gauges.dif).style.width = `${Math.min(100, difMin)}%`;
-  gauges.giros.textContent = String(estado.crucesEstrella);
-  fill(gauges.giros).style.width = `${Math.min(100, estado.crucesEstrella * 8)}%`;
 }
 
 let playing = true;
@@ -171,14 +164,14 @@ function animate() {
       estado.totalSidereoH += dur;
       estado.inicioSidereo = base.sim.dias;
       estado.crucesEstrella++;
-      label(gauges.sider).textContent = `Día sidéreo · últ. ${fmtHoras(dur)}`;
+      em(gauges.sider).textContent = `Giro #${estado.crucesEstrella} · últ. ${fmtHoras(dur)}`;
     }
     if (estado.dPrevSol < -CRUCE && dSol > CRUCE) {
       const dur = (base.sim.dias - estado.inicioSolar) * 24;
       estado.totalSolarH += dur;
       estado.inicioSolar = base.sim.dias;
       estado.crucesSol++;
-      label(gauges.solar).textContent = `Día solar · últ. ${fmtHoras(dur)}`;
+      em(gauges.solar).textContent = `últ. ${fmtHoras(dur)}`;
     }
   }
   estado.dPrevEstrella = dEstrella;

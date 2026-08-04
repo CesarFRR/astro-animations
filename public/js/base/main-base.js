@@ -59,7 +59,7 @@ playBtn.addEventListener("click", () => {
   playBtn.textContent = playing ? "⏸ Pausar" : "▶ Reproducir";
 });
 
-restartBtn.addEventListener("click", () => {
+if (restartBtn) restartBtn.addEventListener("click", () => {
   base.sim.dias = 0;
   base.sim.M = 0;
   base.sim.MLuna = 0;

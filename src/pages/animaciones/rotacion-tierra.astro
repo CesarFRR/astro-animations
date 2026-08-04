@@ -3,39 +3,48 @@ import AnimationLayout from '../../layouts/AnimationLayout.astro';
 ---
 <AnimationLayout
   title="Rotación de la Tierra — Día Sidéreo vs Solar"
-  subtitle="Animación 1 · 1× = 1 día por segundo · Meridiano 0 marcado en rojo"
+  subtitle="Animación 1 · 1× = 1 día por segundo"
   scriptSrc="js/rotacion/main-rotacion.js"
   phaseTitle="Día sidéreo (23h 56m 04s) vs día solar (24h)"
-  phaseCaption="La Tierra da una vuelta completa sobre su eje en 23 h 56 m 04 s: es el día sidéreo, medido contra las estrellas. Pero mientras gira, avanza casi 1° en su órbita, y el Sol parece haberse movido: la flecha roja tarda 3 m 56 s más en volver a apuntarle. Ese es el día solar. La flecha roja marca el meridiano 0; la blanca apunta a una estrella fija; la amarilla, al Sol."
+  phaseCaption="La Tierra gira sobre su eje mientras avanza ~1° en su órbita. La flecha roja es el meridiano 0: tarda 23h 56m 04s en volver a apuntar a la estrella (blanca), pero 3m 56s más en apuntar al Sol (amarillo), porque este parece haberse movido. Por eso el día solar dura 24h."
 >
-  <section class="hud" slot="hud">
+  <section class="hud hud-relojes" slot="hud">
     <div class="gauge">
-      <span class="gauge-label">Día sidéreo</span>
-      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-label">Día sidéreo (estrellas) <em>Giro #0</em></span>
       <span class="gauge-value" id="gauge-sider">00:00:00</span>
     </div>
     <div class="gauge">
-      <span class="gauge-label">Día solar</span>
-      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-label">Día solar (Sol) <em>últ. —</em></span>
       <span class="gauge-value" id="gauge-solar">00:00:00</span>
     </div>
     <div class="gauge">
-      <span class="gauge-label">Diferencia (solar − sidéreo)</span>
-      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-label">Diferencia acumulada</span>
       <span class="gauge-value" id="gauge-dif">+0.0 min</span>
-    </div>
-    <div class="gauge">
-      <span class="gauge-label">Giros sidéreos</span>
-      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
-      <span class="gauge-value" id="gauge-giros">0</span>
     </div>
   </section>
 
   <section class="legend" slot="legend">
     <div class="legend-item"><span class="dot halpha"></span>Meridiano 0</div>
-    <div class="legend-item"><span class="dot gamma"></span>Estrella de referencia</div>
+    <div class="legend-item"><span class="dot gamma"></span>Estrella fija</div>
     <div class="legend-item"><span class="dot accretion"></span>Hacia el Sol</div>
   </section>
 
   <button id="btn-restart" class="ctrl-btn" slot="controls">↺ Reiniciar</button>
+
+  <style>
+    .hud-relojes { justify-content: center; gap: 0.8rem; }
+    .hud-relojes .gauge-value {
+      font-size: clamp(1.35rem, 2.6vw, 1.8rem);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+      color: #fff;
+      text-align: left;
+    }
+    .hud-relojes .gauge-value#gauge-dif { color: var(--accent2); }
+    .hud-relojes .gauge-label em {
+      font-style: normal;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+  </style>
 </AnimationLayout>
