@@ -65,9 +65,10 @@ cada animación explica un movimiento concreto. Fuente del contenido:
 
 ### Pendientes de esta serie
 
-- [ ] Descargar texturas (Tierra 2K, Luna 2K, Sol 2K + textura simple) a `public/textures/`
+- [x] Descargar texturas (Solar System Scope, CC BY 4.0) → `public/textures/` en WebP
 - [ ] Crear módulo compartido `public/js/shared/orbits.js` (Kepler + VSOP simplificado + elementos de la Luna)
 - [ ] Crear módulo compartido `public/js/shared/esfera-celeste.js` (líneas eclíptica/ecuador/polos para 5 y 7)
+- [ ] **Clic-para-enfocar** en la base (ver sección Optimización): `visible=false` al resto + prefetch de textura
 - [ ] Animación 1: rotación (sidéreo vs solar)
 - [ ] Animación 2: traslación (perihelio/afelio)
 - [ ] Animación 3: estaciones
@@ -75,6 +76,52 @@ cada animación explica un movimiento concreto. Fuente del contenido:
 - [ ] Animación 7: coordenadas ecuatoriales
 - [ ] Animación 5: precesión + nutación + Chandler
 - [ ] Animación 6: ciclos de Milanković
+
+---
+
+## ⚡ Optimización & Rendimiento (análisis 04-ago)
+
+> Fuente: video "Most Optimization Advice Misses the REAL Problem" (SimonDev) +
+> sesión con Gemini sobre texturas. Aplicado a nuestra base el mismo día.
+
+### Filosofía (del video)
+
+1. **Presupuesto de frame**: 60fps = 16.6 ms por frame. Todo (render + post + partículas) vive ahí.
+2. **Perfilar antes de optimizar** (CPU vs GPU): nunca optimizar a ciegas. DevTools profiler basta para JS.
+3. **"Don't do the work"**: nada es más rápido que no hacerlo → culling, LOD, ocultar lo no visible.
+4. **Peor caso ≠ caso promedio**: las explosiones de la supernova (miles de partículas) serán nuestro peor caso — se resuelve con **instancing + presupuesto de partículas**, no con LOD.
+5. **Rendimientos decrecientes**: cuando la escena es trivialmente barata (nuestro caso hoy), parar — la ganancia de seguir no vale el código.
+
+### Lo que ya aplicamos a la base (✅)
+
+| Mejora | Detalle |
+|---|---|
+| WebP (q85) | 3.3MB → 1.2MB; Tierra 166KB, Sol 270KB, Luna 628KB, nubes 130KB |
+| Nubes 1K + AdditiveBlending | Las partes negras se vuelven transparentes sin canal alfa; `depthWrite: false` |
+| Geometría compartida | Tierra y nubes usan la misma `SphereGeometry` (nubes con `scale 1.02`) |
+| LoadingManager | Exportado desde `createBase`; evita planetas en blanco |
+| SRGBColorSpace + mipmaps | Ya activos (defaults correctos de Three.js) |
+| Starfield en un solo `BufferGeometry` | 4,000 estrellas = 1 draw call |
+
+### Aclaración importante (BufferGeometry ≠ optimización)
+
+`BufferGeometry` es solo el **formato de datos** de geometría en Three.js (todo lo es
+internamente); no "desrenderiza" nada. Lo que sí funciona:
+
+- **`object.visible = false`** → el objeto no se envía a la GPU (costo cero). Es el
+  "don't draw what you can't see" del video. Para el modo enfoque: ocultar Sol/Luna/órbitas.
+- **Frustum culling**: Three.js ya descarta automáticamente lo que queda fuera de cámara.
+- **Prefetch + cache de textura**: el lag al cambiar texturas viene de decodificar/subir a
+  GPU en el hilo principal; cargándola antes (`TextureLoader` cache) el cambio es instantáneo.
+- **`THREE.LOD`** (el de Halo Reach): intercambia malla/textura por distancia. Brillará
+  cuando la escena tenga muchos objetos (asteroides, anillos, partículas); hoy (5-20 mallas)
+  sería premature optimization.
+
+### Plan "calidad solo en lo visible" (para la base)
+
+1. Clic en un cuerpo → cámara se acerca (GSAP) + `visible=false` al resto del sistema.
+2. Textura fina precargada con antelación (prefetch en hover o al inicio en segundo plano).
+3. Cuando la escena crezca: `THREE.LOD` por cuerpo (malla 128/64/32 + textura 2K/1K).
 
 ---
 
