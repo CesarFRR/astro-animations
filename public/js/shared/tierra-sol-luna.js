@@ -241,7 +241,7 @@ export function distanciaTierraSol(sim, a) {
 }
 
 export function crearTierraSola(scene, opts = {}) {
-  const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true } = opts;
+  const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true, crepusculo = false } = opts;
   const loader = new THREE.TextureLoader(manager);
   const tex = {
     tierra: loader.load(`${BASE}/textures/earth_daymap.webp`),
@@ -282,14 +282,16 @@ export function crearTierraSola(scene, opts = {}) {
   tierra.add(tierraTilt);
   scene.add(tierra);
 
-  const luz = new THREE.PointLight(0xfff1d0, 30, 300, 1);
+  const luz = new THREE.DirectionalLight(0xfff1d0, 1.15);
   luz.position.set(30, 15, 25);
   scene.add(luz);
+  scene.add(luz.target);
   scene.add(new THREE.AmbientLight(0x223355, 0.35));
 
   let atmosferaMesh = null;
   if (atmosfera) {
     const dirSol = luz.position.clone().normalize();
+    const twilight = crepusculo ? ATM_CREPUSCULO.clone() : ATM_DIA.clone();
     atmosferaMesh = new THREE.Mesh(
       geo,
       new THREE.ShaderMaterial({
@@ -299,7 +301,7 @@ export function crearTierraSola(scene, opts = {}) {
         uniforms: {
           uSunDir: { value: dirSol },
           uDayColor: { value: ATM_DIA.clone() },
-          uTwilightColor: { value: ATM_CREPUSCULO.clone() },
+          uTwilightColor: { value: twilight },
         },
         vertexShader: ATM_VERTEX,
         fragmentShader: ATM_FRAGMENT,
@@ -331,9 +333,10 @@ export function crearLunaSola(scene, opts = {}) {
   );
   scene.add(luna);
 
-  const luz = new THREE.PointLight(0xffffff, 30, 250, 1);
+  const luz = new THREE.DirectionalLight(0xffffff, 1.0);
   luz.position.set(15, 10, 20);
   scene.add(luz);
+  scene.add(luz.target);
   scene.add(new THREE.AmbientLight(0x223355, 0.4));
 
   const sim = { dias: 0 };

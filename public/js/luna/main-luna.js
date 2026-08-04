@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { createScene } from "/astro-animations/js/shared/setup.js";
 import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/starfield.js";
 import { crearLunaSola, updateLunaSola } from "/astro-animations/js/shared/tierra-sol-luna.js";
+import { crearNavegacionTeclado } from "/astro-animations/js/shared/navegacion.js";
 
 const { renderer, scene, camera, controls, composer } = createScene({
   bloomStrength: 1.2,
@@ -19,6 +20,7 @@ controls.panSpeed = 1.1;
 const sf = createStarfield(scene, 4000, 60, 500);
 
 const luna = crearLunaSola(scene, { radio: 0.6 });
+const navegar = crearNavegacionTeclado(camera, controls);
 
 let playing = true;
 let rotar = false;
@@ -44,9 +46,11 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
   luna.luz.position.copy(camera.position);
+  luna.luz.target.position.copy(controls.target);
   if (playing && rotar) {
     updateLunaSola(luna.sim, luna, dt * speed);
   }
+  navegar(dt);
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();
   composer.render();

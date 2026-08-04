@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { createScene } from "/astro-animations/js/shared/setup.js";
 import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/starfield.js";
+import { crearNavegacionTeclado } from "/astro-animations/js/shared/navegacion.js";
 
 const TAU = Math.PI * 2;
 const BASE = "/astro-animations";
@@ -53,6 +54,8 @@ const glow = new THREE.Sprite(
 glow.scale.setScalar(26);
 scene.add(glow);
 
+const navegar = crearNavegacionTeclado(camera, controls);
+
 const sim = { dias: 0 };
 let playing = true;
 let rotar = false;
@@ -81,6 +84,7 @@ function animate() {
     sim.dias += dt * speed;
     sol.rotation.y = (TAU * sim.dias) / 25.05;
   }
+  navegar(dt);
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();
   composer.render();
