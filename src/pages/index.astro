@@ -17,8 +17,6 @@
   -->
   ---
   import { animations, categories } from '../data/animations';
-  const animationsJson = JSON.stringify(animations);
-  const categoriesJson = JSON.stringify(categories);
   ---
   <!DOCTYPE html>
 <html lang="es">
@@ -328,7 +326,7 @@
     </footer>
   </div>
 
-  <script type="module" is:inline>
+  <script type="module" is:inline define:vars={{ animations, categories }}>
     import * as THREE from "three";
     import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/starfield.js";
 
@@ -356,8 +354,6 @@
     })();
 
     // ---- Data ----
-    const animations = ${animationsJson};
-    const categories = ${categoriesJson};
     const iconDe = (cat) => categories.find((c) => c.id === cat)?.icon || "🌌";
     const nombreDe = (cat) => categories.find((c) => c.id === cat)?.name || cat;
 
