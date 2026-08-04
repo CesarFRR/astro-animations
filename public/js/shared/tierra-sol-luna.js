@@ -30,14 +30,15 @@ export function createBase(scene, opts = {}) {
     a = AU,
     e = E_TIERRA,
     mostrarOrbitas = true,
+    manager = new THREE.LoadingManager(),
   } = opts;
 
-  const loader = new THREE.TextureLoader();
+  const loader = new THREE.TextureLoader(manager);
   const tex = {
-    sol: loader.load(`${BASE}/textures/sun_2k.jpg`),
-    tierra: loader.load(`${BASE}/textures/earth_daymap_2k.jpg`),
-    nubes: loader.load(`${BASE}/textures/earth_clouds_2k.jpg`),
-    luna: loader.load(`${BASE}/textures/moon_2k.jpg`),
+    sol: loader.load(`${BASE}/textures/sun.webp`),
+    tierra: loader.load(`${BASE}/textures/earth_daymap.webp`),
+    nubes: loader.load(`${BASE}/textures/earth_clouds.webp`),
+    luna: loader.load(`${BASE}/textures/moon.webp`),
   };
   tex.tierra.colorSpace = THREE.SRGBColorSpace;
   tex.nubes.colorSpace = THREE.SRGBColorSpace;
@@ -59,8 +60,9 @@ export function createBase(scene, opts = {}) {
   const tierraTilt = new THREE.Group();
   tierraTilt.rotation.z = TILT_ECLIPTICA;
   const tierraSpin = new THREE.Group();
+  const tierraGeo = new THREE.SphereGeometry(tierraRadio, 64, 48);
   const tierraMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(tierraRadio, 64, 48),
+    tierraGeo,
     new THREE.MeshPhongMaterial({
       map: tex.tierra,
       specular: new THREE.Color(0x444455),
@@ -69,14 +71,16 @@ export function createBase(scene, opts = {}) {
   );
   tierraSpin.add(tierraMesh);
   const nubesMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(tierraRadio * 1.02, 64, 48),
+    tierraGeo,
     new THREE.MeshPhongMaterial({
       map: tex.nubes,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
       depthWrite: false,
     })
   );
+  nubesMesh.scale.setScalar(1.02);
   tierraSpin.add(nubesMesh);
   tierraTilt.add(tierraSpin);
   tierra.add(tierraTilt);
@@ -134,7 +138,7 @@ export function createBase(scene, opts = {}) {
     distLuna,
   };
 
-  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, sim, tex };
+  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, sim, tex, manager };
 }
 
 export function updateBase(sim, refs, dt) {
