@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { createScene } from "/astro-animations/js/shared/setup.js";
 import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/starfield.js";
 import { createBase, updateBase } from "/astro-animations/js/shared/tierra-sol-luna.js";
-import { crearTexturaTierraSimple } from "/astro-animations/js/shared/textura-simple.js";
+import { cargarTexturasSimples } from "/astro-animations/js/shared/textura-simple.js";
 
 const TAU = Math.PI * 2;
 
@@ -16,6 +16,8 @@ const { renderer, scene, camera, controls, composer } = createScene({
 
 const sf = createStarfield(scene, 4000, 60, 500);
 
+const texSimples = cargarTexturasSimples();
+
 const base = createBase(scene, {
   a: 20,
   e: 0.0167,
@@ -23,7 +25,7 @@ const base = createBase(scene, {
   tierraRadio: 1.2,
   lunaRadio: 0.33,
   distLuna: 4,
-  tierraTextura: crearTexturaTierraSimple(),
+  tierraTextura: texSimples.dia,
   mostrarNubes: false,
 });
 
