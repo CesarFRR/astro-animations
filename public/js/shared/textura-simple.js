@@ -25,6 +25,9 @@ export function crearTexturaTierraSimple() {
   canvas.height = H;
   const ctx = canvas.getContext("2d");
 
+  const ux = (u) => u * W;
+  const vy = (v) => (1 - v) * H;
+
   ctx.fillStyle = "#2b6fae";
   ctx.fillRect(0, 0, W, H);
 
@@ -38,9 +41,6 @@ export function crearTexturaTierraSimple() {
   ctx.beginPath();
   ctx.ellipse(ux(0.8), vy(0.58), 55, 40, -0.5, 0, Math.PI * 2);
   ctx.fill();
-
-  const ux = (u) => u * W;
-  const vy = (v) => (1 - v) * H;
 
   ctx.strokeStyle = "rgba(210, 235, 255, 0.5)";
   ctx.lineWidth = 1.5;

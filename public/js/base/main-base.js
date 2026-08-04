@@ -81,6 +81,7 @@ const CUERPOS = {
 const NOMBRES = { sol: "Sol", tierra: "Tierra", luna: "Luna" };
 
 let enfocado = null;
+let animar = false;
 let offsetCam = null;
 const posInicial = camera.position.clone();
 const targetInicial = controls.target.clone();
@@ -94,8 +95,11 @@ function aplicarVisibilidad() {
 }
 
 function enfocar(cuerpo) {
+  if (enfocado === cuerpo) return;
   enfocado = cuerpo;
+  animar = true;
   const dist = CUERPOS[cuerpo].distancia;
+  CUERPOS[cuerpo].objeto.updateMatrixWorld(true);
   CUERPOS[cuerpo].objeto.getWorldPosition(vWorld);
   offsetCam = new THREE.Vector3()
     .subVectors(camera.position, vWorld)
@@ -107,7 +111,7 @@ function enfocar(cuerpo) {
 
 function salirDeEnfoque() {
   enfocado = null;
-  offsetCam = null;
+  animar = true;
   aplicarVisibilidad();
   if (gauges.foco) gauges.foco.textContent = "General";
 }
@@ -131,20 +135,36 @@ canvas.addEventListener("pointerdown", (e) => {
 });
 
 const clock = new THREE.Clock();
+const FIN_TRANSICION = 0.15;
+
 function animate() {
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
   if (playing) {
     updateBase(base.sim, base, dt * speed);
   }
-  if (enfocado) {
+  if (animar) {
+    if (enfocado) {
+      CUERPOS[enfocado].objeto.updateMatrixWorld(true);
+      CUERPOS[enfocado].objeto.getWorldPosition(vWorld);
+      controls.target.lerp(vWorld, 0.12);
+      camera.position.lerp(vWorld.clone().add(offsetCam), 0.12);
+      if (camera.position.distanceTo(vWorld.clone().add(offsetCam)) < FIN_TRANSICION) {
+        animar = false;
+      }
+    } else {
+      controls.target.lerp(targetInicial, 0.1);
+      camera.position.lerp(posInicial, 0.1);
+      if (camera.position.distanceTo(posInicial) < FIN_TRANSICION) {
+        animar = false;
+        camera.position.copy(posInicial);
+        controls.target.copy(targetInicial);
+      }
+    }
+  } else if (enfocado) {
     CUERPOS[enfocado].objeto.updateMatrixWorld(true);
     CUERPOS[enfocado].objeto.getWorldPosition(vWorld);
-    controls.target.lerp(vWorld, 0.12);
-    camera.position.lerp(vWorld.clone().add(offsetCam), 0.12);
-  } else {
-    controls.target.lerp(targetInicial, 0.08);
-    camera.position.lerp(posInicial, 0.08);
+    controls.target.lerp(vWorld, 0.08);
   }
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();
