@@ -2,7 +2,7 @@ export interface Animation {
   id: string;
   title: string;
   description: string;
-  category: 'supernova' | 'estrella' | 'agujero-negro' | 'pulsar' | 'nebulosa';
+  category: 'supernova' | 'estrella' | 'agujero-negro' | 'pulsar' | 'nebulosa' | 'sistema-solar';
   tags: string[];
   thumbnail: string;
   difficulty: 'basico' | 'intermedio' | 'avanzado';
@@ -41,6 +41,16 @@ export const animations: Animation[] = [
     duration: '2-4 min'
   },
   {
+    id: 'base-tierra-sol-luna',
+    title: 'Sistema Tierra–Sol–Luna (Base)',
+    description: 'Piso de entorno: Tierra con eje inclinado 23.44°, Luna en órbita inclinada 5.14° y Sol, sobre órbitas keplerianas reales. Base para las animaciones de movimientos de la Tierra.',
+    category: 'sistema-solar',
+    tags: ['Órbitas reales', 'Oblicuidad', 'Fases lunares'],
+    thumbnail: '/thumbnails/base-tierra-sol-luna.jpg',
+    difficulty: 'basico',
+    duration: '∞'
+  },
+  {
     id: 'crab-pulsar',
     title: 'Púlsar del Cangrejo (PSR B0531+21)',
     description: 'El corazón de la Nebulosa del Cangrejo, una estrella de neutrones que gira 30 veces por segundo, nacida de la supernova SN 1054.',
@@ -68,5 +78,6 @@ export const categories = [
   { id: 'estrella', name: 'Estrellas', icon: '⭐' },
   { id: 'agujero-negro', name: 'Agujeros Negros', icon: '🕳️' },
   { id: 'pulsar', name: 'Púlsares', icon: '💫' },
+  { id: 'sistema-solar', name: 'Sistema Solar', icon: '🌍' },
   { id: 'nebulosa', name: 'Nebulosas', icon: '🌀' }
 ];

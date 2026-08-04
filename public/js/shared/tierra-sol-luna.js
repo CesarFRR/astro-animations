@@ -1,0 +1,167 @@
+import * as THREE from "three";
+
+const TAU = Math.PI * 2;
+const BASE = "/astro-animations";
+const AU = 20;
+const DIA_SIDEREO = 23.9345;
+const DIA_SOLAR = 24.0;
+const ANIO_TROPICAL = 365.2422;
+const MES_SIDEREO = 27.3217;
+const MES_SINODICO = 29.5306;
+const PERIODO_NODOS_LUNARES = 18.6;
+const TILT_ECLIPTICA = (23.44 * Math.PI) / 180;
+const INCLINACION_LUNAR = (5.14 * Math.PI) / 180;
+const E_TIERRA = 0.0167;
+
+function kepler(M, e) {
+  let E = M;
+  for (let i = 0; i < 6; i++) {
+    E = E - (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  }
+  return E;
+}
+
+export function createBase(scene, opts = {}) {
+  const {
+    solRadio = 3,
+    tierraRadio = 1.2,
+    lunaRadio = 0.33,
+    distLuna = 4,
+    a = AU,
+    e = E_TIERRA,
+    mostrarOrbitas = true,
+  } = opts;
+
+  const loader = new THREE.TextureLoader();
+  const tex = {
+    sol: loader.load(`${BASE}/textures/sun_2k.jpg`),
+    tierra: loader.load(`${BASE}/textures/earth_daymap_2k.jpg`),
+    nubes: loader.load(`${BASE}/textures/earth_clouds_2k.jpg`),
+    luna: loader.load(`${BASE}/textures/moon_2k.jpg`),
+  };
+  tex.tierra.colorSpace = THREE.SRGBColorSpace;
+  tex.nubes.colorSpace = THREE.SRGBColorSpace;
+  tex.luna.colorSpace = THREE.SRGBColorSpace;
+
+  const sol = new THREE.Group();
+  const solMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(solRadio, 64, 48),
+    new THREE.MeshBasicMaterial({ map: tex.sol })
+  );
+  sol.add(solMesh);
+  scene.add(sol);
+
+  const solLight = new THREE.PointLight(0xfff1d0, 900, 0, 2);
+  scene.add(solLight);
+  scene.add(new THREE.AmbientLight(0x223355, 0.25));
+
+  const tierra = new THREE.Group();
+  const tierraTilt = new THREE.Group();
+  tierraTilt.rotation.z = TILT_ECLIPTICA;
+  const tierraSpin = new THREE.Group();
+  const tierraMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(tierraRadio, 64, 48),
+    new THREE.MeshPhongMaterial({
+      map: tex.tierra,
+      specular: new THREE.Color(0x444455),
+      shininess: 12,
+    })
+  );
+  tierraSpin.add(tierraMesh);
+  const nubesMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(tierraRadio * 1.02, 64, 48),
+    new THREE.MeshPhongMaterial({
+      map: tex.nubes,
+      transparent: true,
+      opacity: 0.45,
+      depthWrite: false,
+    })
+  );
+  tierraSpin.add(nubesMesh);
+  tierraTilt.add(tierraSpin);
+  tierra.add(tierraTilt);
+  scene.add(tierra);
+
+  const lunaOrbita = new THREE.Group();
+  lunaOrbita.rotation.x = INCLINACION_LUNAR;
+  const luna = new THREE.Group();
+  const lunaMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(lunaRadio, 48, 32),
+    new THREE.MeshPhongMaterial({ map: tex.luna, shininess: 4 })
+  );
+  luna.add(lunaMesh);
+  lunaOrbita.add(luna);
+  tierra.add(lunaOrbita);
+
+  const orbitas = [];
+  if (mostrarOrbitas) {
+    const lineaMat = new THREE.LineBasicMaterial({ color: 0x4facfe, transparent: true, opacity: 0.3 });
+    const lineaMatLuna = new THREE.LineBasicMaterial({ color: 0x8aa4c8, transparent: true, opacity: 0.3 });
+    const ptsTierra = [];
+    const b = a * Math.sqrt(1 - e * e);
+    for (let i = 0; i <= 128; i++) {
+      const ang = (i / 128) * TAU;
+      ptsTierra.push(new THREE.Vector3(a * Math.cos(ang), 0, -b * Math.sin(ang)));
+    }
+    const orbitaTierra = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(ptsTierra),
+      lineaMat
+    );
+    scene.add(orbitaTierra);
+    orbitas.push(orbitaTierra);
+
+    const ptsLuna = [];
+    for (let i = 0; i <= 64; i++) {
+      const ang = (i / 64) * TAU;
+      ptsLuna.push(new THREE.Vector3(distLuna * Math.cos(ang), 0, -distLuna * Math.sin(ang)));
+    }
+    const orbitaLuna = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(ptsLuna),
+      lineaMatLuna
+    );
+    lunaOrbita.add(orbitaLuna);
+    orbitas.push(orbitaLuna);
+  }
+
+  const sim = {
+    dias: 0,
+    M: 0,
+    MLuna: 0,
+    nodo: 0,
+    spin: 0,
+    a,
+    e,
+    distLuna,
+  };
+
+  return { sol, solMesh, tierra, tierraTilt, tierraSpin, lunaOrbita, luna, orbitas, sim, tex };
+}
+
+export function updateBase(sim, refs, dt) {
+  sim.dias += dt;
+
+  sim.M = (sim.M + (TAU * dt) / ANIO_TROPICAL) % TAU;
+  const E = kepler(sim.M, sim.e);
+  const x = sim.a * (Math.cos(E) - sim.e);
+  const z = -sim.a * Math.sqrt(1 - sim.e * sim.e) * Math.sin(E);
+  refs.tierra.position.set(x, 0, z);
+
+  sim.spin = (sim.spin + (TAU * dt) / DIA_SIDEREO) % TAU;
+  refs.tierraSpin.rotation.y = sim.spin;
+
+  sim.MLuna = (sim.MLuna + (TAU * dt) / MES_SIDEREO) % TAU;
+  sim.nodo = (sim.nodo - (TAU * dt) / (PERIODO_NODOS_LUNARES * ANIO_TROPICAL)) % TAU;
+  refs.lunaOrbita.rotation.y = sim.nodo;
+  refs.luna.position.set(
+    sim.distLuna * Math.cos(sim.MLuna),
+    0,
+    -sim.distLuna * Math.sin(sim.MLuna)
+  );
+
+  refs.sol.rotation.y += (TAU * dt) / 25.05;
+}
+
+export function distanciaTierraSol(sim, a) {
+  const E = kepler(sim.M, sim.e);
+  return a * (1 - sim.e * Math.cos(E));
+}

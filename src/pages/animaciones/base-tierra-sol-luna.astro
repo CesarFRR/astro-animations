@@ -1,0 +1,33 @@
+---
+import AnimationLayout from '../../layouts/AnimationLayout.astro';
+---
+<AnimationLayout
+  title="Sistema Tierra–Sol–Luna (Base)"
+  subtitle="Piso de entorno · Órbitas reales (Kepler) · Escala: 1 ua = 20 u"
+  scriptSrc="js/base/main-base.js"
+  phaseTitle="Base del sistema"
+  phaseCaption="La Tierra orbita al Sol en una elipse (e = 0.0167) con el Sol en un foco, girando sobre un eje inclinado 23.44°; la Luna orbita inclinada 5.14° sobre la eclíptica con nodos que regresan cada 18.6 años. Esta es la base sobre la que se construyen las animaciones de movimientos de la Tierra."
+>
+  <section class="hud" slot="hud">
+    <div class="gauge">
+      <span class="gauge-label">Día del año</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-value" id="gauge-dias">0 d</span>
+    </div>
+    <div class="gauge">
+      <span class="gauge-label">Distancia al Sol</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 50%"></div></div>
+      <span class="gauge-value" id="gauge-distancia">1.000 ua</span>
+    </div>
+    <div class="gauge">
+      <span class="gauge-label">Velocidad orbital</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 50%"></div></div>
+      <span class="gauge-value" id="gauge-velocidad">29.8 km/s</span>
+    </div>
+    <div class="gauge">
+      <span class="gauge-label">Fase lunar</span>
+      <div class="gauge-bar"><div class="gauge-fill" style="width: 0%"></div></div>
+      <span class="gauge-value" id="gauge-fase">Luna 0%</span>
+    </div>
+  </section>
+</AnimationLayout>
