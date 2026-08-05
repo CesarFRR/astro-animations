@@ -1,26 +1,28 @@
 <!DOCTYPE html><!--
-  THESIS: El catálogo es la página. Sin hero que robe atención. El visitante ve
-  inmediatamente las tarjetas de animaciones ordenadas en grid, con thumbnails
-  y metadata, y entiende de qué va el proyecto por la estructura misma del catálogo.
+    THESIS: El catálogo es la página. Sin hero que robe atención. El visitante ve
+    inmediatamente las tarjetas de animaciones ordenadas en grid, con thumbnails
+    y metadata, y entiende de qué va el proyecto por la estructura misma del catálogo.
 
-  OWN-WORLD: Fondo oscuro espacial (#05070a) con acento azul NASA (#4facfe).
-  Tipografía sistema limpia. Starfield Three.js como textura ambiental de fondo.
+    OWN-WORLD: Fondo oscuro espacial (#05070a) con acento azul NASA (#4facfe).
+    Tipografía sistema limpia. Starfield Three.js como textura ambiental de fondo.
 
-  STORY: El visitante llega, ve un grid de tarjetas con thumbnails estilo YouTube,
-  filtra por categoría, hace clic en una animación y entra a la experiencia 3D.
+    STORY: El visitante llega, ve un grid de tarjetas con thumbnails estilo YouTube,
+    filtra por categoría, hace clic en una animación y entra a la experiencia 3D.
 
-  FIRST VIEWPORT: Top bar compacta (logo + search). Grid de tarjetas con thumbnail
-  16:9, título, categoría y tags. Filtros como píldoras.
-  Starfield animado de fondo sutil.
+    FIRST VIEWPORT: Top bar compacta (logo + search). Grid de tarjetas con thumbnail
+    16:9, título, categoría y tags. Filtros como píldoras.
+    Starfield animado de fondo sutil.
 
-  FORM: YouTube-grid sobre lienzo NASA. Catálogo clásico con thumbnails.
---><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Astro Animations</title><meta name="description" content="Simulaciones 3D educativas de fenómenos astrofísicos. Supernovas, agujeros negros, púlsares y más."><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="importmap">
+    FORM: YouTube-grid sobre lienzo NASA. Catálogo clásico con thumbnails.
+  --><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Astro Animations</title><meta name="description" content="Simulaciones 3D educativas de fenómenos astrofísicos. Supernovas, agujeros negros, púlsares y más."><link rel="icon" type="image/svg+xml" href="/favicon.svg"><script type="importmap">
     {
       "imports": {
         "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
       }
     }
-  </script><link rel="stylesheet" href="/astro-animations/assets/index.DXAfUXwX.css"></head> <body> <canvas id="starfield-canvas"></canvas> <div class="app"> <header class="top-bar"> <a href="/astro-animations/" class="logo">astro<span>animations</span></a> <div class="search-container"> <span class="search-icon">⌕</span> <input type="search" placeholder="Buscar animaciones..." aria-label="Buscar animaciones"> </div> <div class="top-actions"> <a href="https://github.com/CesarFRR/astro-animations" class="nav-link" target="_blank" rel="noopener">GitHub</a> </div> </header> <main class="main-content"> <h2 class="section-heading">Catálogo de animaciones</h2> <p class="section-desc">Simulaciones 3D interactivas de fenómenos astrofísicos. Explora, orbita y aprende.</p> <div class="filters" id="filters"> <button class="filter-btn active" data-category="todas">🌌 Todas</button> <button class="filter-btn" data-category="supernova">💥 Supernovas</button> <button class="filter-btn" data-category="estrella">⭐ Estrellas</button> <button class="filter-btn" data-category="agujero-negro">🕳️ Agujeros Negros</button> <button class="filter-btn" data-category="pulsar">💫 Púlsares</button> </div> <div class="animation-grid" id="grid"></div> </main> <footer class="footer"> <p>Astro Animations · Datos astronómicos reales · MIT License</p> </footer> </div> <script type="module">
+  </script><link rel="stylesheet" href="/astro-animations/assets/index.DXAfUXwX.css"></head> <body> <canvas id="starfield-canvas"></canvas> <div class="app"> <header class="top-bar"> <a href="/astro-animations/" class="logo">astro<span>animations</span></a> <div class="search-container"> <span class="search-icon">⌕</span> <input type="search" placeholder="Buscar animaciones..." aria-label="Buscar animaciones"> </div> <div class="top-actions"> <a href="https://github.com/CesarFRR/astro-animations" class="nav-link" target="_blank" rel="noopener">GitHub</a> </div> </header> <main class="main-content"> <h2 class="section-heading">Catálogo de animaciones</h2> <p class="section-desc">Simulaciones 3D interactivas de fenómenos astrofísicos. Explora, orbita y aprende.</p> <div class="filters" id="filters"></div> <div class="animation-grid" id="grid"></div> </main> <footer class="footer"> <p>Astro Animations · Datos astronómicos reales · MIT License</p> </footer> </div> <script type="module">const animations = [{"id":"supernova-pares","title":"Supernova de Inestabilidad de Pares","description":"Una estrella masiva colapsa cuando los rayos gamma se convierten en pares electrón-positrón, eliminando la presión de radiación que la sostenía.","category":"supernova","tags":["Núcleo masivo","Pares e⁻e⁺","Destrucción total"],"thumbnail":"/thumbnails/supernova-pares.jpg","difficulty":"avanzado","duration":"3-5 min"},{"id":"agujero-negro","title":"Supernova que deja un Agujero Negro","description":"El colapso de una estrella de más de 25 masas solares forma un agujero negro con disco de acreción y jets relativistas.","category":"agujero-negro","tags":["Colapso gravitatorio","Jets relativistas","Disco de acreción"],"thumbnail":"/thumbnails/agujero-negro.jpg","difficulty":"avanzado","duration":"4-6 min"},{"id":"enana-blanca","title":"De Gigante Roja a Enana Blanca","description":"El ciclo de vida de una estrella como el Sol, desde la fusión estable hasta la eyección de la nebulosa planetaria.","category":"estrella","tags":["Estrella tipo solar","Nebulosa planetaria","Secuencia principal"],"thumbnail":"/thumbnails/enana-blanca.jpg","difficulty":"basico","duration":"2-4 min"},{"id":"base-tierra-sol-luna","title":"Sistema Tierra–Sol–Luna (Base)","description":"Piso de entorno: Tierra con eje inclinado 23.44°, Luna en órbita inclinada 5.14° y Sol, sobre órbitas keplerianas reales. Base para las animaciones de movimientos de la Tierra.","category":"sistema-solar","tags":["Órbitas reales","Oblicuidad","Fases lunares"],"thumbnail":"/thumbnails/base-tierra-sol-luna.jpg","difficulty":"basico","duration":"∞"},{"id":"rotacion-tierra","title":"Rotación — Día Sidéreo vs Solar","description":"Una vuelta sobre el eje dura 23h 56m 04s (día sidéreo), pero el Sol tarda 3m 56s más en volver al mismo meridiano: el día solar de 24h. Dos relojes miden los cruces en vivo.","category":"sistema-solar","tags":["Rotación","Día sidéreo","Día solar"],"thumbnail":"/thumbnails/rotacion-tierra.jpg","difficulty":"basico","duration":"3-5 min"},{"id":"tierra-libre","title":"Tierra — Vuelo Libre","description":"La Tierra a solas, en alta calidad: atmósfera, nubes y rotación sidérea. Controles tipo Google Earth: orbita, desplázate con WASD y acércate hasta la superficie.","category":"sistema-solar","tags":["Controles Google Earth","Atmósfera fresnel","Rotación"],"thumbnail":"/thumbnails/tierra-libre.jpg","difficulty":"basico","duration":"∞"},{"id":"sol-estudio","title":"Sol — La Estrella Madre","description":"El Sol a solas con su corona: la fotosfera gira en ~25 días y el halo surge del bloom. Ideal para presentar la estrella de nuestro sistema.","category":"sistema-solar","tags":["Fotosfera","Rotación 25 días","Corona"],"thumbnail":"/thumbnails/sol-estudio.jpg","difficulty":"basico","duration":"∞"},{"id":"luna-estudio","title":"Luna — Rotación Síncrona","description":"La Luna a solas: gira sobre sí misma en 27.3 días, el mismo tiempo que tarda en orbitar la Tierra. Por eso siempre vemos la misma cara.","category":"sistema-solar","tags":["Rotación síncrona","Mes sidéreo","Relieve"],"thumbnail":"/thumbnails/luna-estudio.jpg","difficulty":"basico","duration":"∞"},{"id":"crab-pulsar","title":"Púlsar del Cangrejo (PSR B0531+21)","description":"El corazón de la Nebulosa del Cangrejo, una estrella de neutrones que gira 30 veces por segundo, nacida de la supernova SN 1054.","category":"pulsar","tags":["Estrella de neutrones","Resto de supernova","Audio 3D sincronizado"],"thumbnail":"/thumbnails/crab-pulsar.jpg","difficulty":"intermedio","duration":"∞"},{"id":"pulsar-vela","title":"Púlsar de Vela (PSR B0833-45)","description":"Una estrella de neutrones girando 89 veces por segundo, emitiendo pulsos de radio y rayos gamma como un faro cósmico.","category":"pulsar","tags":["Estrella de neutrones","Rotación extrema","Audio 3D sincronizado"],"thumbnail":"/thumbnails/pulsar-vela.jpg","difficulty":"intermedio","duration":"∞"}];
+const categories = [{"id":"todas","name":"Todas","icon":"🌌"},{"id":"supernova","name":"Supernovas","icon":"💥"},{"id":"estrella","name":"Estrellas","icon":"⭐"},{"id":"agujero-negro","name":"Agujeros Negros","icon":"🕳️"},{"id":"pulsar","name":"Púlsares","icon":"💫"},{"id":"sistema-solar","name":"Sistema Solar","icon":"🌍"},{"id":"nebulosa","name":"Nebulosas","icon":"🌀"}];
+
     import * as THREE from "three";
     import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/starfield.js";
 
@@ -48,31 +50,32 @@
     })();
 
     // ---- Data ----
-    const animations = [
-      { id:"supernova-pares", title:"Supernova de Inestabilidad de Pares", cat:"supernova", diff:"avanzado", tags:["Núcleo masivo","Pares e⁻e⁺","Destrucción total"], icon:"💥" },
-      { id:"agujero-negro", title:"Supernova que deja un Agujero Negro", cat:"agujero-negro", diff:"avanzado", tags:["Colapso gravitatorio","Jets relativistas","Disco de acreción"], icon:"🕳️" },
-      { id:"enana-blanca", title:"De Gigante Roja a Enana Blanca", cat:"estrella", diff:"basico", tags:["Estrella tipo solar","Nebulosa planetaria","Secuencia principal"], icon:"⭐" },
-      { id:"crab-pulsar", title:"Púlsar del Cangrejo (PSR B0531+21)", cat:"pulsar", diff:"intermedio", tags:["Estrella de neutrones","Resto de supernova","Audio 3D"], icon:"💫" },
-      { id:"pulsar-vela", title:"Púlsar de Vela (PSR B0833-45)", cat:"pulsar", diff:"intermedio", tags:["Estrella de neutrones","Rotación extrema","Audio 3D"], icon:"💫" },
-    ];
+    const iconDe = (cat) => categories.find((c) => c.id === cat)?.icon || "🌌";
+    const nombreDe = (cat) => categories.find((c) => c.id === cat)?.name || cat;
+
+    // ---- Filtros ----
+    const filters = document.getElementById("filters");
+    filters.innerHTML = categories
+      .map((c, i) => `<button class="filter-btn${i === 0 ? " active" : ""}" data-category="${c.id}">${c.icon} ${c.name}</button>`)
+      .join("");
 
     // ---- Render grid ----
     const grid = document.getElementById("grid");
     function renderGrid(cat) {
       grid.innerHTML = "";
-      const items = cat === "todas" ? animations : animations.filter(a => a.cat === cat);
+      const items = cat === "todas" ? animations : animations.filter(a => a.category === cat);
       for (const a of items) {
         const card = document.createElement("a");
         card.href = `/astro-animations/animaciones/${a.id}/`;
         card.className = "animation-card";
         card.innerHTML = `
           <div class="card-thumb-wrap">
-            <div class="card-thumb-placeholder">${a.icon}</div>
+            <div class="card-thumb-placeholder">${iconDe(a.category)}</div>
             
           </div>
           <div class="card-body">
             <h3 class="card-title">${a.title}</h3>
-            <span class="card-meta">${a.diff} · ${a.cat}</span>
+            <span class="card-meta">${a.difficulty} · ${nombreDe(a.category)}</span>
             <div class="card-tags">${a.tags.map(t => `<span class="card-tag">${t}</span>`).join("")}</div>
           </div>`;
         grid.appendChild(card);
@@ -81,9 +84,9 @@
     renderGrid("todas");
 
     // ---- Filter logic ----
-    document.querySelectorAll(".filter-btn").forEach(btn => {
+    filters.querySelectorAll(".filter-btn").forEach(btn => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+        filters.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         renderGrid(btn.getAttribute("data-category"));
       });

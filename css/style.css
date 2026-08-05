@@ -50,6 +50,15 @@ html, body {
   padding: 1.1rem 1.75rem;
   background: linear-gradient(180deg, rgba(5,7,10,0.95) 0%, rgba(5,7,10,0.5) 100%);
   pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.top-titles {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .top-bar h1 {
@@ -58,6 +67,9 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.02em;
   text-shadow: 0 0 22px rgba(79, 172, 254, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .top-bar .subtitle {
@@ -67,9 +79,6 @@ html, body {
 }
 
 .nav-link {
-  position: absolute;
-  right: 1.75rem;
-  top: 1.1rem;
   color: var(--muted);
   text-decoration: none;
   font-size: 0.9rem;
@@ -78,6 +87,7 @@ html, body {
   padding: 0.4rem 0.75rem;
   background: rgba(10, 16, 28, 0.6);
   pointer-events: auto;
+  white-space: nowrap;
   transition: all 0.15s;
 }
 
@@ -85,6 +95,71 @@ html, body {
   color: var(--text);
   border-color: var(--accent);
   box-shadow: 0 0 12px rgba(79, 172, 254, 0.3);
+}
+
+/* ===== ACCIONES SUPERIORES: botón de ocultar widgets + volver al catálogo ===== */
+.top-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  pointer-events: auto;
+}
+
+.eye-btn {
+  background: rgba(10, 16, 28, 0.6);
+  border: 1px solid var(--panel-border);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.eye-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(79, 172, 254, 0.3);
+}
+
+.eye-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(79, 172, 254, 0.18);
+}
+
+.widgets-hidden .widgets-grid {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ===== BOTONES TOP-BAR vs BARRA DE OPCIONES (por viewport) ===== */
+.desktop-only { display: none; }
+.mobile-only { display: none; }
+
+@media (min-width: 601px) {
+  .desktop-only { display: flex; align-items: center; gap: 0.6rem; }
+  .mobile-only { display: none; }
+}
+
+@media (max-width: 600px) {
+  .desktop-only { display: none; }
+  .mobile-only { display: flex; align-items: center; gap: 0.5rem; }
+}
+
+.controls-actions { flex: none; }
+
+.controls-actions .nav-link {
+  background: linear-gradient(180deg, rgba(79,172,254,0.2), rgba(79,172,254,0.08));
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.controls-actions .nav-link:hover {
+  color: var(--text);
+  box-shadow: 0 0 14px rgba(79,172,254,0.35);
 }
 
 /* ===== WIDGETS GRID =====
@@ -326,6 +401,27 @@ html, body {
   border-color: var(--accent);
 }
 
+/* ===== OVERLAY: columna flex para que los widgets queden pegados a los controles ===== */
+.app-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.app-overlay .top-bar { position: static; flex: none; }
+
+.app-overlay .widgets-grid {
+  position: static;
+  flex: 1;
+  min-height: 0;
+  padding: 1.1rem 1.75rem 1.25rem;
+}
+
+.app-overlay .controls { position: static; flex: none; pointer-events: auto; }
+
 /* ===== CONTROLS ===== */
 .controls {
   position: fixed;
@@ -402,7 +498,127 @@ html, body {
 .speed-control select:focus {
   border-color: var(--text);
   box-shadow: 0 0 10px rgba(79, 172, 254, 0.35);
-  outline: none;
+}
+
+/* ===== PANEL DE OPCIONES ===== */
+.panel-opciones {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.opciones {
+  position: relative;
+}
+
+.opciones summary {
+  list-style: none;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(79, 172, 254, 0.2), rgba(79, 172, 254, 0.08));
+  border: 1px solid var(--accent);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.7rem 1.2rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.opciones summary::-webkit-details-marker {
+  display: none;
+}
+
+.opciones[open] summary {
+  background: rgba(79, 172, 254, 0.35);
+}
+
+.opciones summary:hover {
+  box-shadow: 0 0 14px rgba(79, 172, 254, 0.35);
+}
+
+.opciones-cuerpo {
+  position: fixed;
+  bottom: 5.5rem;
+  left: 1.5rem;
+  width: 320px;
+  max-width: min(320px, calc(100vw - 2rem));
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  background: rgba(10, 16, 28, 0.96);
+  background: rgba(10, 16, 28, 0.96);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.opciones-toggles {
+  display: flex;
+  gap: 1.1rem;
+}
+
+.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.98rem;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.chk input {
+  accent-color: var(--accent);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
+.opciones-fila {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.opciones-etiqueta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  min-width: 3.2rem;
+}
+
+.seg {
+  display: inline-flex;
+  background: #0d1522;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.seg button {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.seg button:hover {
+  color: var(--text);
+  background: rgba(79, 172, 254, 0.15);
+}
+
+.seg button.active {
+  background: var(--accent);
+  color: #04121f;
+  font-weight: 600;
 }
 
 .timeline-wrap {
@@ -463,7 +679,6 @@ html, body {
 
 @media (max-width: 1024px) {
   .top-bar { padding: 0.95rem 1.5rem; }
-  .nav-link { right: 1.5rem; top: 0.95rem; }
   .widgets-grid { top: 5.6rem; bottom: 5.8rem; grid-template-columns: minmax(0, 1fr) minmax(0, 320px); gap: 0.85rem; }
   .phase-panel { padding: 1.1rem 1.3rem; }
   .hud { padding: 1rem 1.2rem; gap: 0.85rem; }
@@ -474,7 +689,6 @@ html, body {
 @media (max-width: 768px) {
   .top-bar { padding: 0.85rem 1.2rem; }
   .top-bar .subtitle { display: none; }
-  .nav-link { right: 1.2rem; top: 0.85rem; }
   .widgets-grid {
     top: 4.4rem;
     left: 0.9rem;
@@ -500,24 +714,32 @@ html, body {
     left: 0.75rem;
     right: 0.75rem;
     bottom: 10.5rem;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "desc"
-      "hud"
-      "legend"
-      "chart";
-    grid-template-rows: auto auto auto auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
 
-  .phase-panel { max-height: 40vh; }
-  .hud { height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1rem; }
+  .phase-panel {
+    flex: none;
+    max-height: 26vh;
+    align-self: flex-start;
+  }
+
+  .hud {
+    margin-top: auto;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem 1rem;
+  }
   .gauge-label { font-size: 0.75rem; }
   .gauge-value { font-size: 0.8rem; }
   .gauge-bar { height: 8px; }
 
   .legend {
+    flex: none;
     position: static;
     width: 100%;
     flex-wrap: wrap;
@@ -540,6 +762,14 @@ html, body {
   .lightcurve-panel.visible { display: flex; }
 
   .controls { flex-wrap: wrap; gap: 0.65rem; padding: 0.75rem; }
+  .controls-actions { margin-left: auto; }
+  .controls-actions .nav-link,
+  .controls-actions .eye-btn {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
   .timeline-wrap { order: 3; width: 100%; flex: none; }
   #timeline { height: 12px; border-radius: 6px; }
   #timeline::-webkit-slider-thumb { width: 26px; height: 26px; }
@@ -554,6 +784,7 @@ html, body {
   .widgets-grid {
     top: 0.5rem;
     bottom: 6rem;
+    display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
     grid-template-areas:
       "desc hud"
@@ -561,7 +792,8 @@ html, body {
     grid-template-rows: auto minmax(0, 1fr);
     overflow-y: auto;
   }
-  .hud { display: flex; flex-direction: column; }
+  .phase-panel { max-height: 40vh; }
+  .hud { margin-top: 0; display: flex; flex-direction: column; }
   .lightcurve-panel { min-height: 0; }
   .legend { justify-content: flex-start; }
   .lightcurve-panel { display: flex; }

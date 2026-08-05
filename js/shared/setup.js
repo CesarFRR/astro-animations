@@ -22,6 +22,8 @@ export function createScene(opts = {}) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.3;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(fogColor, fogDensity);
@@ -36,19 +38,22 @@ export function createScene(opts = {}) {
   controls.maxDistance = 150;
   controls.target.set(0, 0, 0);
 
-  const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight),
-    bloomStrength, bloomRadius, bloomThreshold
-  );
-  composer.addPass(bloom);
+  const composer = bloomStrength > 0 ? new EffectComposer(renderer) : null;
+  let bloom = null;
+  if (composer) {
+    composer.addPass(new RenderPass(scene, camera));
+    bloom = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      bloomStrength, bloomRadius, bloomThreshold
+    );
+    composer.addPass(bloom);
+  }
 
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
+    if (composer) composer.setSize(window.innerWidth, window.innerHeight);
   });
 
   return { renderer, scene, camera, controls, composer, bloom, canvas };
