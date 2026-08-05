@@ -47,19 +47,7 @@ const lodTierra = crearLODTierra(
     },
   ]
 );
-
-let despertado = false;
-function despertarLOD() {
-  if (despertado) return;
-  despertado = true;
-  lodTierra.precargarTodo();
-}
-window.addEventListener("wheel", (e) => {
-  if (e.deltaY < 0) despertarLOD();
-}, { passive: true });
-window.addEventListener("keydown", (e) => {
-  if (["w", "s", "arrowup", "arrowdown"].includes(e.key.toLowerCase())) despertarLOD();
-});
+lodTierra.precargarTodo();
 
 let playing = true;
 let rotar = false;

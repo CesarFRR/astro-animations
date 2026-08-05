@@ -13,7 +13,7 @@ const { renderer, scene, camera, controls, composer } = createScene({
   cameraPos: [2.6, 1.4, 5.2],
 });
 
-controls.minDistance = 0.9;
+controls.minDistance = 0.2;
 controls.maxDistance = 60;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 1.1;
@@ -30,19 +30,7 @@ const lodLuna = crearLODTierra(
     { max: 2.4, urls: ["/astro-animations/textures/max/8k_moon.webp"], srgb: true },
   ]
 );
-
-let despertado = false;
-function despertarLOD() {
-  if (despertado) return;
-  despertado = true;
-  lodLuna.precargarTodo();
-}
-window.addEventListener("wheel", (e) => {
-  if (e.deltaY < 0) despertarLOD();
-}, { passive: true });
-window.addEventListener("keydown", (e) => {
-  if (["w", "s", "arrowup", "arrowdown"].includes(e.key.toLowerCase())) despertarLOD();
-});
+lodLuna.precargarTodo();
 
 let playing = true;
 let rotar = false;

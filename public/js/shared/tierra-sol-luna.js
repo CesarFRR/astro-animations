@@ -92,7 +92,7 @@ const TIERRA_FRAGMENT = /* glsl */ `
     float NdotV = max(dot(n, viewDir), 0.0);
     vec3 diffuse = day * (0.10 + 1.0 * ndl);
 
-    float rough = clamp(detail.g, 0.25, 0.35);
+    float rough = 0.25 + 0.10 * clamp(detail.g, 0.0, 1.0);
     float a = rough * rough;
     float a2 = a * a;
     vec3 H = normalize(sunDir + viewDir);
@@ -367,8 +367,8 @@ export function crearTierraSola(scene, opts = {}) {
   const tex = {
     dia: loader.load(`${BASE}/textures/normal/earth_daymap.webp`),
     noche: loader.load(`${BASE}/textures/max/2k_earth_nightmap.webp`),
-    detalle: loader.load(`${BASE}/textures/max/2k_earth_detail.webp`),
-    nubes: loader.load(`${BASE}/textures/max/2k_earth_clouds.webp`),
+    detalle: loader.load(`${BASE}/textures/max/2k_earth_bump_roughness_clouds.webp`),
+    nubes: loader.load(`${BASE}/textures/max/earth_clouds_1024.png`),
   };
   tex.dia.colorSpace = THREE.SRGBColorSpace;
   tex.dia.anisotropy = 8;
@@ -416,7 +416,7 @@ export function crearTierraSola(scene, opts = {}) {
     fragmentShader: CLOUDS_FRAGMENT,
   });
   const nubes1 = new THREE.Mesh(geo, materialNubes);
-  nubes1.scale.setScalar(1.03);
+  nubes1.scale.setScalar(1.01);
   nubes1.renderOrder = 1;
   nubes1.visible = nubes;
   tierraSpin.add(nubes1);
