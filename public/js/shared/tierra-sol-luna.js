@@ -413,10 +413,10 @@ export function crearLunaSola(scene, opts = {}) {
   scene.add(luna);
 
   const luz = new THREE.DirectionalLight(0xffffff, 1.0);
-  luz.position.set(15, 10, 20);
+  luz.position.set(0, 0, 1);
   scene.add(luz);
   scene.add(luz.target);
-  scene.add(new THREE.AmbientLight(0x223355, 0.4));
+  scene.add(new THREE.AmbientLight(0x223355, 0.25));
 
   const sim = { dias: 0 };
   return { luna, luz, sim, tex, manager, radio };

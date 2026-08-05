@@ -41,7 +41,12 @@ export function crearLODTierra(materiales, niveles) {
     if (!ts) return false;
     for (let k = 0; k < materiales.length; k++) {
       const m = materiales[k];
-      m.material.uniforms[m.uniform].value = ts[k % ts.length];
+      if (m.prop) {
+        m.material[m.prop] = ts[k % ts.length];
+        m.material.needsUpdate = true;
+      } else {
+        m.material.uniforms[m.uniform].value = ts[k % ts.length];
+      }
     }
     actual = i;
     return true;
