@@ -333,7 +333,7 @@ export function crearTierraSola(scene, opts = {}) {
   }
 
   const sim = { dias: 0 };
-  return { tierra, tierraTilt, tierraSpin, nubes, atmosfera: atmosferaMesh, luz, sim, tex, manager, radio };
+  return { tierra, tierraTilt, tierraSpin, mesh, nubes, atmosfera: atmosferaMesh, luz, sim, tex, manager, radio };
 }
 
 export function updateTierraSola(sim, refs, dt) {
