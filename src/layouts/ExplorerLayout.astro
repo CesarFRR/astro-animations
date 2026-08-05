@@ -37,12 +37,12 @@ const { title, subtitle = "", scriptSrc, navHref = "/astro-animations/", navLabe
   </header>
 
   <section class="controls">
-    <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
+    <button id="btn-play" class="ctrl-btn">⏸</button>
     <slot name="controls" />
     <div class="speed-control">
       <label for="speed">Velocidad</label>
       <select id="speed">
-        <option value="0.1">0.1×</option>
+        <option value="0.1" selected>0.1×</option>
         <option value="0.25">0.25×</option>
         <option value="0.5">0.5×</option>
         <option value="1" selected>1×</option>

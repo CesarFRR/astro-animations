@@ -431,13 +431,13 @@ varying vec3 vPosW;
     shader.fragmentShader = shader.fragmentShader.replace(
       'roughnessFactor *= texelRoughness.g;',
       `roughnessFactor *= texelRoughness.g;
-  roughnessFactor = 0.25 + 0.10 * roughnessFactor;`
+  roughnessFactor = 0.30 + 0.20 * roughnessFactor;`
     );
 
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <opaque_fragment>',
       `{
-  if (uModo >= 0.5 && uModo < 1.5) outgoingLight = diffuseColor.rgb * 1.1;
+  if (uModo >= 0.5 && uModo < 1.5) outgoingLight = diffuseColor.rgb * 0.85;
   vec3 nightColor = texture2D(uNight, vMapUv).rgb;
   float sunOrient = dot(normalize(vNormalW), normalize(uSunDir));
   float ds = smoothstep(-0.25, 0.5, sunOrient);

@@ -50,19 +50,13 @@ const lodTierra = crearLODTierra(
 lodTierra.precargarTodo();
 
 let playing = true;
-let rotar = false;
-let speed = 1;
+let rotar = true;
+let speed = 0.1;
 const playBtn = document.getElementById("btn-play");
-const rotarBtn = document.getElementById("btn-rotar");
 const speedSelect = document.getElementById("speed");
 playBtn.addEventListener("click", () => {
   playing = !playing;
   playBtn.textContent = playing ? "⏸" : "▶";
-});
-rotarBtn.addEventListener("click", () => {
-  rotar = !rotar;
-  rotarBtn.textContent = "⟳";
-  rotarBtn.classList.toggle("muted", !rotar);
 });
 speedSelect.addEventListener("change", (e) => {
   speed = parseFloat(e.target.value);

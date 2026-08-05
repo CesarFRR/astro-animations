@@ -13,7 +13,7 @@ const { renderer, scene, camera, controls, composer } = createScene({
   cameraPos: [1.2, 0.6, 2.5],
 });
 
-controls.minDistance = 0.01;
+controls.minDistance = 0.7;
 controls.maxDistance = 60;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 1.1;
@@ -33,19 +33,13 @@ const lodLuna = crearLODTierra(
 lodLuna.precargarTodo();
 
 let playing = true;
-let rotar = false;
-let speed = 1;
+let rotar = true;
+let speed = 0.1;
 const playBtn = document.getElementById("btn-play");
-const rotarBtn = document.getElementById("btn-rotar");
 const speedSelect = document.getElementById("speed");
 playBtn.addEventListener("click", () => {
   playing = !playing;
   playBtn.textContent = playing ? "⏸" : "▶";
-});
-rotarBtn.addEventListener("click", () => {
-  rotar = !rotar;
-  rotarBtn.textContent = "⟳";
-  rotarBtn.classList.toggle("muted", !rotar);
 });
 speedSelect.addEventListener("change", (e) => {
   speed = parseFloat(e.target.value);
