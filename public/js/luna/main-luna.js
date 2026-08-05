@@ -63,7 +63,7 @@ segCalidad.forEach((b) => {
 
 const optSombra = document.getElementById("opt-sombra");
 optSombra?.addEventListener("change", (e) => {
-  luna.luz.intensity = e.target.checked ? 1.0 : 0;
+  luna.luz.intensity = e.target.checked ? 1.5 : 0;
 });
 
 const clock = new THREE.Clock();

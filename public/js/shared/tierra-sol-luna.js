@@ -431,7 +431,7 @@ varying vec3 vPosW;
     shader.fragmentShader = shader.fragmentShader.replace(
       'roughnessFactor *= texelRoughness.g;',
       `roughnessFactor *= texelRoughness.g;
-  roughnessFactor = 0.30 + 0.20 * roughnessFactor;`
+  roughnessFactor = 0.40 + 0.30 * roughnessFactor;`
     );
 
     shader.fragmentShader = shader.fragmentShader.replace(
@@ -531,11 +531,11 @@ export function crearLunaSola(scene, opts = {}) {
   );
   scene.add(luna);
 
-  const luz = new THREE.DirectionalLight(0xffffff, 1.0);
+  const luz = new THREE.DirectionalLight(0xffffff, 1.5);
   luz.position.set(0, 0, 1);
   scene.add(luz);
   scene.add(luz.target);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.2));
 
   const sim = { dias: 0 };
   return { luna, luz, sim, tex, manager, radio };
