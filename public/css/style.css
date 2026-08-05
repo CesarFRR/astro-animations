@@ -442,13 +442,13 @@ html, body {
 }
 
 .opciones-cuerpo {
-  position: fixed;
-  bottom: 4.5rem;
-  right: 1.5rem;
-  width: min(320px, calc(100vw - 3rem));
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 0;
+  width: 320px;
+  max-width: min(320px, calc(100vw - 2rem));
   max-height: calc(100vh - 6rem);
   overflow-y: auto;
-  z-index: 20;
   background: rgba(10, 16, 28, 0.96);
   background: rgba(10, 16, 28, 0.96);
   border: 1px solid var(--panel-border);

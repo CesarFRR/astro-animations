@@ -98,6 +98,12 @@ segCalidad.forEach((b) => {
   });
 });
 
+document.querySelector(".controls")?.addEventListener("click", (e) => {
+  if (!e.target.closest(".opciones")) {
+    document.querySelectorAll("details.opciones[open]").forEach((d) => (d.open = false));
+  }
+});
+
 const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
