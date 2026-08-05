@@ -66,6 +66,9 @@ export function crearLODTierra(materiales, niveles) {
       if (!aplicar(forzado)) cargar(forzado);
       return;
     }
+    for (let i = 0; i < niveles.length; i++) {
+      if (dist <= (niveles[i].pre ?? Infinity)) cargar(i);
+    }
     let nivel = 0;
     for (let i = 0; i < niveles.length; i++) {
       if (dist <= (niveles[i].max ?? Infinity)) nivel = i;

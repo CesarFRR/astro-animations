@@ -63,11 +63,12 @@ const TIERRA_FRAGMENT = /* glsl */ `
   uniform vec3 uSunDir;
   uniform vec3 uAtmDay;
   uniform vec3 uAtmTwilight;
-  uniform float uNubes;
   uniform float uModo;
   varying vec3 vNormalW;
   varying vec3 vPosW;
   varying vec2 vUv;
+
+  const float PI_ = 3.14159265359;
 
   void main() {
     vec3 normal = normalize(vNormalW);
@@ -80,22 +81,31 @@ const TIERRA_FRAGMENT = /* glsl */ `
     vec3 day = texture(uDay, vUv).rgb;
     vec3 night = texture(uNight, vUv).rgb;
     vec3 detail = texture(uDetail, vUv).rgb;
-    float clouds = smoothstep(0.3, 0.9, detail.b) * uNubes;
-
-    vec3 base = mix(day, vec3(1.0), clouds * 0.35);
 
     float h = detail.r;
     float hx = texture(uDetail, vUv + vec2(0.002, 0.0)).r;
     float hy = texture(uDetail, vUv + vec2(0.0, 0.002)).r;
     vec3 n = normalize(normal + vec3(hx - h, hy - h, 0.0) * 2.0);
 
-    float ndl = max(dot(n, sunDir), 0.0);
-    vec3 lit = base * (0.16 + 0.84 * ndl);
+    float NdotL = max(dot(n, sunDir), 0.0);
+    float NdotV = max(dot(n, viewDir), 0.0);
+    vec3 diffuse = day * (0.10 + 1.0 * NdotL);
 
-    float rough = clamp(detail.g, 0.05, 1.0);
-    float ocean = smoothstep(0.45, 0.2, rough);
-    float spec = pow(max(dot(reflect(-sunDir, n), viewDir), 0.0), 120.0);
-    lit += vec3(0.9, 0.95, 1.0) * spec * 0.25 * ocean * smoothstep(0.0, 0.5, sunOrient);
+    float rough = clamp(detail.g, 0.25, 0.35);
+    float a = rough * rough;
+    float a2 = a * a;
+    vec3 H = normalize(sunDir + viewDir);
+    float NdotH = max(dot(n, H), 0.0);
+    float VdotH = max(dot(viewDir, H), 0.0);
+    float denom = NdotH * NdotH * (a2 - 1.0) + 1.0;
+    float D = a2 / max(PI_ * denom * denom, 1e-6);
+    float k = (a + 1.0) * (a + 1.0) / 8.0;
+    float Gv = NdotV / max(NdotV * (1.0 - k) + k, 1e-6);
+    float Gl = NdotL / max(NdotL * (1.0 - k) + k, 1e-6);
+    vec3 F0 = vec3(0.04);
+    vec3 F = F0 + (vec3(1.0) - F0) * pow(1.0 - VdotH, 5.0);
+    vec3 spec = D * Gv * Gl * F / max(4.0 * NdotV * NdotL, 1e-4);
+    vec3 lit = diffuse + spec * 0.9;
 
     float ds = smoothstep(-0.25, 0.5, sunOrient);
     ds = mix(ds, 1.0, step(0.5, uModo));
@@ -104,9 +114,34 @@ const TIERRA_FRAGMENT = /* glsl */ `
 
     vec3 atmo = mix(uAtmTwilight, uAtmDay, smoothstep(-0.25, 0.75, sunOrient));
     float atmoMix = clamp(smoothstep(-0.5, 1.0, sunOrient) * fresnel * fresnel, 0.0, 1.0) * 0.6;
+    atmoMix *= 1.0 - step(1.5, uModo);
     color = mix(color, atmo, atmoMix);
 
     gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+const CLOUDS_VERTEX = /* glsl */ `
+  varying vec3 vNormalW;
+  varying vec2 vUv;
+  void main() {
+    vNormalW = normalize(mat3(modelMatrix) * normal);
+    vUv = uv;
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+  }
+`;
+
+const CLOUDS_FRAGMENT = /* glsl */ `
+  uniform sampler2D uClouds;
+  uniform vec3 uSunDir;
+  varying vec3 vNormalW;
+  varying vec2 vUv;
+  void main() {
+    vec3 n = normalize(vNormalW);
+    float sunOrient = dot(n, normalize(uSunDir));
+    float day = smoothstep(-0.15, 0.35, sunOrient);
+    float c = texture(uClouds, vUv).r;
+    gl_FragColor = vec4(vec3(1.0) * c * day, c * day * 0.85);
   }
 `;
 
@@ -324,18 +359,20 @@ export function distanciaTierraSol(sim, a) {
 }
 
 export function crearTierraSola(scene, opts = {}) {
-  const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true, sunDir = new THREE.Vector3(0, 0, 1) } = opts;
+  const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true, nubes = true, sunDir = new THREE.Vector3(0, 0, 1) } = opts;
   const loader = new THREE.TextureLoader(manager);
   const tex = {
     dia: loader.load(`${BASE}/textures/normal/earth_daymap.webp`),
     noche: loader.load(`${BASE}/textures/max/2k_earth_nightmap.webp`),
     detalle: loader.load(`${BASE}/textures/max/2k_earth_detail.webp`),
+    nubes: loader.load(`${BASE}/textures/max/2k_earth_clouds.webp`),
   };
   tex.dia.colorSpace = THREE.SRGBColorSpace;
   tex.dia.anisotropy = 8;
   tex.noche.colorSpace = THREE.SRGBColorSpace;
   tex.noche.anisotropy = 8;
   tex.detalle.anisotropy = 8;
+  tex.nubes.anisotropy = 8;
 
   const tierra = new THREE.Group();
   const tierraTilt = new THREE.Group();
@@ -350,7 +387,6 @@ export function crearTierraSola(scene, opts = {}) {
     uSunDir: { value: sunDir.clone().normalize() },
     uAtmDay: { value: ATM_DIA.clone() },
     uAtmTwilight: { value: ATM_CREPUSCULO.clone() },
-    uNubes: { value: 1 },
     uModo: { value: 0 },
   };
 
@@ -363,6 +399,29 @@ export function crearTierraSola(scene, opts = {}) {
     })
   );
   tierraSpin.add(mesh);
+
+  const materialNubes = new THREE.ShaderMaterial({
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    uniforms: {
+      uClouds: { value: tex.nubes },
+      uSunDir: { value: uniforms.uSunDir.value.clone() },
+    },
+    vertexShader: CLOUDS_VERTEX,
+    fragmentShader: CLOUDS_FRAGMENT,
+  });
+  const nubes1 = new THREE.Mesh(geo, materialNubes);
+  nubes1.scale.setScalar(1.025);
+  nubes1.renderOrder = 1;
+  nubes1.visible = nubes;
+  tierraSpin.add(nubes1);
+  const nubes2 = new THREE.Mesh(geo, materialNubes.clone());
+  nubes2.scale.setScalar(1.05);
+  nubes2.renderOrder = 2;
+  nubes2.visible = nubes;
+  tierraSpin.add(nubes2);
+
   tierraTilt.add(tierraSpin);
   tierra.add(tierraTilt);
   scene.add(tierra);
@@ -387,16 +446,20 @@ export function crearTierraSola(scene, opts = {}) {
       })
     );
     atmosferaMesh.scale.setScalar(1.04);
+    atmosferaMesh.renderOrder = 3;
     tierra.add(atmosferaMesh);
   }
 
   const sim = { dias: 0 };
-  return { tierra, tierraTilt, tierraSpin, mesh, atmosfera: atmosferaMesh, uniforms, sim, tex, manager, radio };
+  return { tierra, tierraTilt, tierraSpin, mesh, nubes1, nubes2, atmosfera: atmosferaMesh, uniforms, sim, tex, manager, radio };
 }
 
 export function updateTierraSola(sim, refs, dt) {
   sim.dias += dt;
   refs.tierraSpin.rotation.y = (TAU * sim.dias) / DIA_SIDEREO;
+  if (refs.nubes2) {
+    refs.nubes2.rotation.y = (TAU * sim.dias) / (DIA_SIDEREO * 0.85);
+  }
 }
 
 export function crearLunaSola(scene, opts = {}) {

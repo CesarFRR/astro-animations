@@ -26,8 +26,8 @@ const lodLuna = crearLODTierra(
   [{ material: luna.luna.material, prop: "map" }],
   [
     { max: null, texs: [luna.tex.luna] },
-    { max: 4.0, urls: ["/astro-animations/textures/max/4k_moon.webp"], srgb: true },
-    { max: 2.4, urls: ["/astro-animations/textures/max/8k_moon.webp"], srgb: true },
+    { max: 4.0, pre: 8.0, urls: ["/astro-animations/textures/max/4k_moon.webp"], srgb: true },
+    { max: 2.4, pre: 3.6, urls: ["/astro-animations/textures/max/8k_moon.webp"], srgb: true },
   ]
 );
 

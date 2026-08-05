@@ -31,6 +31,7 @@ const lodTierra = crearLODTierra(
     { max: null, texs: [tierra.tex.dia, tierra.tex.noche] },
     {
       max: 4.0,
+      pre: 8.0,
       urls: [
         "/astro-animations/textures/max/4k_earth_daymap.webp",
         "/astro-animations/textures/max/4k_earth_nightmap.webp",
@@ -39,6 +40,7 @@ const lodTierra = crearLODTierra(
     },
     {
       max: 2.4,
+      pre: 3.6,
       urls: [
         "/astro-animations/textures/max/8k_earth_daymap.webp",
         "/astro-animations/textures/max/8k_earth_nightmap.webp",
@@ -71,22 +73,26 @@ function setSeg(botones, clave, valor) {
   botones.forEach((b) => b.classList.toggle("active", b.dataset[clave] === String(valor)));
 }
 
+function actualizarAtmosfera() {
+  if (tierra.atmosfera) tierra.atmosfera.visible = optAtmosfera.checked && (tierra.uniforms.uModo.value !== 2);
+}
+
 const optNubes = document.getElementById("opt-nubes");
 const optAtmosfera = document.getElementById("opt-atmosfera");
 const segIlum = document.querySelectorAll("#opt-iluminacion button");
 const segCalidad = document.querySelectorAll("#opt-calidad button");
 
 optNubes?.addEventListener("change", (e) => {
-  tierra.uniforms.uNubes.value = e.target.checked ? 1 : 0;
+  tierra.nubes1.visible = e.target.checked;
+  tierra.nubes2.visible = e.target.checked;
 });
-optAtmosfera?.addEventListener("change", (e) => {
-  if (tierra.atmosfera) tierra.atmosfera.visible = e.target.checked;
-});
+optAtmosfera?.addEventListener("change", actualizarAtmosfera);
 segIlum.forEach((b) => {
   b.addEventListener("click", () => {
     const modo = Number(b.dataset.modo);
     tierra.uniforms.uModo.value = modo;
     setSeg(segIlum, "modo", modo);
+    actualizarAtmosfera();
   });
 });
 segCalidad.forEach((b) => {
