@@ -24,8 +24,8 @@ const tierra = crearTierraSola(scene, {});
 const navegar = crearNavegacionTeclado(camera, controls);
 const lodTierra = crearLODTierra(
   [
-    { material: tierra.mesh.material, uniform: "uDay" },
-    { material: tierra.mesh.material, uniform: "uNight" },
+    { material: tierra.mesh.material, prop: "map" },
+    { set: (t) => { tierra.uniforms.uNight.value = t; } },
   ],
   [
     { max: null, texs: [tierra.tex.dia, tierra.tex.noche] },

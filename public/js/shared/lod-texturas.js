@@ -41,7 +41,9 @@ export function crearLODTierra(materiales, niveles) {
     if (!ts) return false;
     for (let k = 0; k < materiales.length; k++) {
       const m = materiales[k];
-      if (m.prop) {
+      if (m.set) {
+        m.set(ts[k % ts.length]);
+      } else if (m.prop) {
         m.material[m.prop] = ts[k % ts.length];
         m.material.needsUpdate = true;
       } else {

@@ -368,7 +368,7 @@ export function crearTierraSola(scene, opts = {}) {
     dia: loader.load(`${BASE}/textures/normal/earth_daymap.webp`),
     noche: loader.load(`${BASE}/textures/max/2k_earth_nightmap.webp`),
     detalle: loader.load(`${BASE}/textures/max/2k_earth_bump_roughness_clouds.webp`),
-    nubes: loader.load(`${BASE}/textures/max/earth_clouds_1024.png`),
+    nubes: loader.load(`${BASE}/textures/max/2k_earth_clouds.webp`),
   };
   tex.dia.colorSpace = THREE.SRGBColorSpace;
   tex.dia.anisotropy = 8;
@@ -383,8 +383,7 @@ export function crearTierraSola(scene, opts = {}) {
   const tierraSpin = new THREE.Group();
   const geo = new THREE.SphereGeometry(radio, 96, 64);
 
-  const uniforms = {
-    uDay: { value: tex.dia },
+  const uniformsRef = {
     uNight: { value: tex.noche },
     uDetail: { value: tex.detalle },
     uSunDir: { value: sunDir.clone().normalize() },
@@ -393,14 +392,75 @@ export function crearTierraSola(scene, opts = {}) {
     uModo: { value: 0 },
   };
 
-  const mesh = new THREE.Mesh(
-    geo,
-    new THREE.ShaderMaterial({
-      uniforms,
-      vertexShader: TIERRA_VERTEX,
-      fragmentShader: TIERRA_FRAGMENT,
-    })
-  );
+  const material = new THREE.MeshStandardMaterial({
+    map: tex.dia,
+    roughness: 1.0,
+    roughnessMap: tex.detalle,
+    bumpMap: tex.detalle,
+    bumpScale: 0.015,
+    metalness: 0,
+    color: new THREE.Color(1, 1, 1),
+  });
+
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <fog_vertex>',
+      `vNormalW = normalize(mat3(modelMatrix) * normal);
+vPosW = (modelMatrix * vec4(transformed, 1.0)).xyz;
+#include <fog_vertex>`
+    );
+    shader.vertexShader =
+      `varying vec3 vNormalW;\nvarying vec3 vPosW;\n` + shader.vertexShader;
+
+    shader.fragmentShader =
+      `uniform sampler2D uNight;
+uniform sampler2D uDetail;
+uniform vec3 uSunDir;
+uniform vec3 uAtmDay;
+uniform vec3 uAtmTwilight;
+uniform float uModo;
+varying vec3 vNormalW;
+varying vec3 vPosW;
+` + shader.fragmentShader;
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <map_fragment>',
+      `#include <map_fragment>
+  float cloudsStr = smoothstep(0.2, 1.0, texture2D(uDetail, vUv).b);
+  diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0), cloudsStr * 2.0);`
+    );
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      'roughnessFactor *= texelRoughness.g;',
+      `roughnessFactor *= texelRoughness.g;
+  float cStr = smoothstep(0.2, 1.0, texture2D(uDetail, vUv).b);
+  roughnessFactor = max(roughnessFactor, step(0.01, cStr));
+  roughnessFactor = 0.25 + 0.10 * roughnessFactor;`
+    );
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <opaque_fragment>',
+      `{
+  vec3 nightColor = texture2D(uNight, vUv).rgb;
+  float sunOrient = dot(normalize(vNormalW), normalize(uSunDir));
+  float ds = smoothstep(-0.25, 0.5, sunOrient);
+  ds = mix(ds, 1.0, step(0.5, uModo));
+  ds = mix(ds, 0.0, step(1.5, uModo));
+  outgoingLight = mix(nightColor, outgoingLight, ds);
+  float fresnel = 1.0 - abs(dot(normalize(vNormalW), normalize(cameraPosition - vPosW)));
+  vec3 atmo = mix(uAtmTwilight, uAtmDay, smoothstep(-0.25, 0.75, sunOrient));
+  float atmoMix = clamp(smoothstep(-0.5, 1.0, sunOrient) * fresnel * fresnel, 0.0, 1.0) * 0.6;
+  atmoMix *= 1.0 - step(1.5, uModo);
+  outgoingLight = mix(outgoingLight, atmo, atmoMix);
+  #include <opaque_fragment>
+  }`
+    );
+
+    Object.assign(shader.uniforms, uniformsRef);
+  };
+  material.customProgramCacheKey = () => 'earth-pbr';
+
+  const mesh = new THREE.Mesh(geo, material);
   tierraSpin.add(mesh);
 
   const materialNubes = new THREE.ShaderMaterial({
@@ -409,8 +469,8 @@ export function crearTierraSola(scene, opts = {}) {
     depthWrite: false,
     uniforms: {
       uClouds: { value: tex.nubes },
-      uSunDir: { value: uniforms.uSunDir.value.clone() },
-      uModo: uniforms.uModo,
+      uSunDir: { value: uniformsRef.uSunDir.value.clone() },
+      uModo: uniformsRef.uModo,
     },
     vertexShader: CLOUDS_VERTEX,
     fragmentShader: CLOUDS_FRAGMENT,
@@ -425,7 +485,10 @@ export function crearTierraSola(scene, opts = {}) {
   tierra.add(tierraTilt);
   scene.add(tierra);
 
-  scene.add(new THREE.AmbientLight(0x223355, 0.35));
+  const sun = new THREE.DirectionalLight(0xffffff, 2);
+  sun.position.copy(sunDir).normalize().multiplyScalar(1);
+  scene.add(sun);
+  scene.add(new THREE.AmbientLight(0x223355, 0.05));
 
   let atmosferaMesh = null;
   if (atmosfera) {
@@ -436,7 +499,7 @@ export function crearTierraSola(scene, opts = {}) {
         transparent: true,
         depthWrite: false,
         uniforms: {
-          uSunDir: { value: uniforms.uSunDir.value.clone() },
+          uSunDir: { value: uniformsRef.uSunDir.value.clone() },
           uDayColor: { value: ATM_DIA.clone() },
           uTwilightColor: { value: ATM_CREPUSCULO.clone() },
         },
@@ -450,7 +513,7 @@ export function crearTierraSola(scene, opts = {}) {
   }
 
   const sim = { dias: 0 };
-  return { tierra, tierraTilt, tierraSpin, mesh, nubes1, atmosfera: atmosferaMesh, uniforms, sim, tex, manager, radio };
+  return { tierra, tierraTilt, tierraSpin, mesh, nubes1, atmosfera: atmosferaMesh, uniforms: uniformsRef, sim, tex, manager, radio };
 }
 
 export function updateTierraSola(sim, refs, dt) {
