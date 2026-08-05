@@ -20,7 +20,7 @@ controls.maxDistance = 120;
 const sf = createStarfield(scene, 4000, 60, 500);
 
 const loader = new THREE.TextureLoader();
-const texSol = loader.load(`${BASE}/textures/sun.webp`);
+const texSol = loader.load(`${BASE}/textures/normal/sun.webp`);
 texSol.colorSpace = THREE.SRGBColorSpace;
 texSol.anisotropy = 8;
 

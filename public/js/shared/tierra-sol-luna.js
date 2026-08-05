@@ -71,10 +71,10 @@ export function createBase(scene, opts = {}) {
 
   const loader = new THREE.TextureLoader(manager);
   const tex = {
-    sol: loader.load(`${BASE}/textures/sun.webp`),
-    tierra: tierraTextura || loader.load(`${BASE}/textures/earth_daymap.webp`),
-    nubes: loader.load(`${BASE}/textures/earth_clouds.webp`),
-    luna: loader.load(`${BASE}/textures/moon.webp`),
+    sol: loader.load(`${BASE}/textures/normal/sun.webp`),
+    tierra: tierraTextura || loader.load(`${BASE}/textures/normal/earth_daymap.webp`),
+    nubes: loader.load(`${BASE}/textures/normal/earth_clouds.webp`),
+    luna: loader.load(`${BASE}/textures/normal/moon.webp`),
   };
   tex.tierra.colorSpace = THREE.SRGBColorSpace;
   tex.nubes.colorSpace = THREE.SRGBColorSpace;
@@ -262,8 +262,8 @@ export function crearTierraSola(scene, opts = {}) {
   const sencillas = cargarTexturasSimples(manager);
   const loader = new THREE.TextureLoader(manager);
   const tex = {
-    dia: loader.load(`${BASE}/textures/earth_daymap.webp`),
-    nubes: loader.load(`${BASE}/textures/earth_clouds.webp`),
+    dia: loader.load(`${BASE}/textures/normal/earth_daymap.webp`),
+    nubes: loader.load(`${BASE}/textures/normal/earth_clouds.webp`),
   };
   tex.dia.colorSpace = THREE.SRGBColorSpace;
   tex.dia.anisotropy = 8;
@@ -344,7 +344,7 @@ export function updateTierraSola(sim, refs, dt) {
 export function crearLunaSola(scene, opts = {}) {
   const { radio = 0.6, manager = new THREE.LoadingManager() } = opts;
   const loader = new THREE.TextureLoader(manager);
-  const tex = { luna: loader.load(`${BASE}/textures/moon.webp`) };
+  const tex = { luna: loader.load(`${BASE}/textures/normal/moon.webp`) };
   tex.luna.colorSpace = THREE.SRGBColorSpace;
   tex.luna.anisotropy = 8;
 
