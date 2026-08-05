@@ -31,7 +31,6 @@ const lodTierra = crearLODTierra(
     { max: null, texs: [tierra.tex.dia, tierra.tex.noche] },
     {
       max: 4.0,
-      pre: 8.0,
       urls: [
         "/astro-animations/textures/max/4k_earth_daymap.webp",
         "/astro-animations/textures/max/4k_earth_nightmap.webp",
@@ -40,7 +39,6 @@ const lodTierra = crearLODTierra(
     },
     {
       max: 2.4,
-      pre: 3.6,
       urls: [
         "/astro-animations/textures/max/8k_earth_daymap.webp",
         "/astro-animations/textures/max/8k_earth_nightmap.webp",
@@ -49,6 +47,19 @@ const lodTierra = crearLODTierra(
     },
   ]
 );
+
+let despertado = false;
+function despertarLOD() {
+  if (despertado) return;
+  despertado = true;
+  lodTierra.precargarTodo();
+}
+window.addEventListener("wheel", (e) => {
+  if (e.deltaY < 0) despertarLOD();
+}, { passive: true });
+window.addEventListener("keydown", (e) => {
+  if (["w", "s", "arrowup", "arrowdown"].includes(e.key.toLowerCase())) despertarLOD();
+});
 
 let playing = true;
 let rotar = false;
@@ -84,7 +95,6 @@ const segCalidad = document.querySelectorAll("#opt-calidad button");
 
 optNubes?.addEventListener("change", (e) => {
   tierra.nubes1.visible = e.target.checked;
-  tierra.nubes2.visible = e.target.checked;
 });
 optAtmosfera?.addEventListener("change", actualizarAtmosfera);
 segIlum.forEach((b) => {

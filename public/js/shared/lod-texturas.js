@@ -61,13 +61,14 @@ export function crearLODTierra(materiales, niveles) {
     forzado = null;
   }
 
+  function precargarTodo() {
+    for (let i = 0; i < niveles.length; i++) cargar(i);
+  }
+
   function actualizarLOD(dt, dist) {
     if (forzado !== null) {
       if (!aplicar(forzado)) cargar(forzado);
       return;
-    }
-    for (let i = 0; i < niveles.length; i++) {
-      if (dist <= (niveles[i].pre ?? Infinity)) cargar(i);
     }
     let nivel = 0;
     for (let i = 0; i < niveles.length; i++) {
@@ -81,5 +82,5 @@ export function crearLODTierra(materiales, niveles) {
     aplicar(nivel);
   }
 
-  return { actualizarLOD, forzar, volverAuto };
+  return { actualizarLOD, forzar, volverAuto, precargarTodo };
 }

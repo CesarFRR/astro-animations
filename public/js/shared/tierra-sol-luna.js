@@ -88,8 +88,9 @@ const TIERRA_FRAGMENT = /* glsl */ `
     vec3 n = normalize(normal + vec3(hx - h, hy - h, 0.0) * 2.0);
 
     float NdotL = max(dot(n, sunDir), 0.0);
+    float ndl = mix(NdotL, 1.0, step(0.5, uModo));
     float NdotV = max(dot(n, viewDir), 0.0);
-    vec3 diffuse = day * (0.10 + 1.0 * NdotL);
+    vec3 diffuse = day * (0.10 + 1.0 * ndl);
 
     float rough = clamp(detail.g, 0.25, 0.35);
     float a = rough * rough;
@@ -101,11 +102,12 @@ const TIERRA_FRAGMENT = /* glsl */ `
     float D = a2 / max(PI_ * denom * denom, 1e-6);
     float k = (a + 1.0) * (a + 1.0) / 8.0;
     float Gv = NdotV / max(NdotV * (1.0 - k) + k, 1e-6);
-    float Gl = NdotL / max(NdotL * (1.0 - k) + k, 1e-6);
+    float Gl = ndl / max(ndl * (1.0 - k) + k, 1e-6);
     vec3 F0 = vec3(0.04);
     vec3 F = F0 + (vec3(1.0) - F0) * pow(1.0 - VdotH, 5.0);
-    vec3 spec = D * Gv * Gl * F / max(4.0 * NdotV * NdotL, 1e-4);
-    vec3 lit = diffuse + spec * 0.9;
+    vec3 spec = D * Gv * Gl * F / max(4.0 * NdotV * ndl, 1e-4);
+    float specGate = 1.0 - step(0.5, uModo);
+    vec3 lit = diffuse + spec * 0.9 * specGate;
 
     float ds = smoothstep(-0.25, 0.5, sunOrient);
     ds = mix(ds, 1.0, step(0.5, uModo));
@@ -134,12 +136,13 @@ const CLOUDS_VERTEX = /* glsl */ `
 const CLOUDS_FRAGMENT = /* glsl */ `
   uniform sampler2D uClouds;
   uniform vec3 uSunDir;
+  uniform float uModo;
   varying vec3 vNormalW;
   varying vec2 vUv;
   void main() {
     vec3 n = normalize(vNormalW);
     float sunOrient = dot(n, normalize(uSunDir));
-    float day = smoothstep(-0.15, 0.35, sunOrient);
+    float day = mix(smoothstep(-0.15, 0.35, sunOrient), 1.0, step(0.5, uModo));
     float c = texture(uClouds, vUv).r;
     gl_FragColor = vec4(vec3(1.0) * c * day, c * day * 0.85);
   }
@@ -407,20 +410,16 @@ export function crearTierraSola(scene, opts = {}) {
     uniforms: {
       uClouds: { value: tex.nubes },
       uSunDir: { value: uniforms.uSunDir.value.clone() },
+      uModo: uniforms.uModo,
     },
     vertexShader: CLOUDS_VERTEX,
     fragmentShader: CLOUDS_FRAGMENT,
   });
   const nubes1 = new THREE.Mesh(geo, materialNubes);
-  nubes1.scale.setScalar(1.025);
+  nubes1.scale.setScalar(1.03);
   nubes1.renderOrder = 1;
   nubes1.visible = nubes;
   tierraSpin.add(nubes1);
-  const nubes2 = new THREE.Mesh(geo, materialNubes.clone());
-  nubes2.scale.setScalar(1.05);
-  nubes2.renderOrder = 2;
-  nubes2.visible = nubes;
-  tierraSpin.add(nubes2);
 
   tierraTilt.add(tierraSpin);
   tierra.add(tierraTilt);
@@ -446,20 +445,17 @@ export function crearTierraSola(scene, opts = {}) {
       })
     );
     atmosferaMesh.scale.setScalar(1.04);
-    atmosferaMesh.renderOrder = 3;
+    atmosferaMesh.renderOrder = 2;
     tierra.add(atmosferaMesh);
   }
 
   const sim = { dias: 0 };
-  return { tierra, tierraTilt, tierraSpin, mesh, nubes1, nubes2, atmosfera: atmosferaMesh, uniforms, sim, tex, manager, radio };
+  return { tierra, tierraTilt, tierraSpin, mesh, nubes1, atmosfera: atmosferaMesh, uniforms, sim, tex, manager, radio };
 }
 
 export function updateTierraSola(sim, refs, dt) {
   sim.dias += dt;
   refs.tierraSpin.rotation.y = (TAU * sim.dias) / DIA_SIDEREO;
-  if (refs.nubes2) {
-    refs.nubes2.rotation.y = (TAU * sim.dias) / (DIA_SIDEREO * 0.85);
-  }
 }
 
 export function crearLunaSola(scene, opts = {}) {

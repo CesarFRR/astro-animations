@@ -26,10 +26,23 @@ const lodLuna = crearLODTierra(
   [{ material: luna.luna.material, prop: "map" }],
   [
     { max: null, texs: [luna.tex.luna] },
-    { max: 4.0, pre: 8.0, urls: ["/astro-animations/textures/max/4k_moon.webp"], srgb: true },
-    { max: 2.4, pre: 3.6, urls: ["/astro-animations/textures/max/8k_moon.webp"], srgb: true },
+    { max: 4.0, urls: ["/astro-animations/textures/max/4k_moon.webp"], srgb: true },
+    { max: 2.4, urls: ["/astro-animations/textures/max/8k_moon.webp"], srgb: true },
   ]
 );
+
+let despertado = false;
+function despertarLOD() {
+  if (despertado) return;
+  despertado = true;
+  lodLuna.precargarTodo();
+}
+window.addEventListener("wheel", (e) => {
+  if (e.deltaY < 0) despertarLOD();
+}, { passive: true });
+window.addEventListener("keydown", (e) => {
+  if (["w", "s", "arrowup", "arrowdown"].includes(e.key.toLowerCase())) despertarLOD();
+});
 
 let playing = true;
 let rotar = false;
