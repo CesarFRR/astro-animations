@@ -80,22 +80,22 @@ const TIERRA_FRAGMENT = /* glsl */ `
     vec3 day = texture(uDay, vUv).rgb;
     vec3 night = texture(uNight, vUv).rgb;
     vec3 detail = texture(uDetail, vUv).rgb;
-    float clouds = smoothstep(0.2, 1.0, detail.b) * uNubes;
+    float clouds = smoothstep(0.3, 0.9, detail.b) * uNubes;
 
-    vec3 base = mix(day, vec3(1.0), clouds * 0.4);
+    vec3 base = mix(day, vec3(1.0), clouds * 0.35);
 
     float h = detail.r;
     float hx = texture(uDetail, vUv + vec2(0.002, 0.0)).r;
     float hy = texture(uDetail, vUv + vec2(0.0, 0.002)).r;
-    float bump = max(h, clouds);
-    vec3 n = normalize(normal + vec3(hx - h, hy - h, 0.0) * 6.0);
+    vec3 n = normalize(normal + vec3(hx - h, hy - h, 0.0) * 2.0);
 
     float ndl = max(dot(n, sunDir), 0.0);
     vec3 lit = base * (0.16 + 0.84 * ndl);
 
     float rough = clamp(detail.g, 0.05, 1.0);
-    float spec = pow(max(dot(reflect(-sunDir, n), viewDir), 0.0), mix(6.0, 60.0, 1.0 - rough));
-    lit += vec3(0.9, 0.95, 1.0) * spec * 0.22 * smoothstep(0.0, 0.5, sunOrient);
+    float ocean = smoothstep(0.45, 0.2, rough);
+    float spec = pow(max(dot(reflect(-sunDir, n), viewDir), 0.0), 120.0);
+    lit += vec3(0.9, 0.95, 1.0) * spec * 0.25 * ocean * smoothstep(0.0, 0.5, sunOrient);
 
     float ds = smoothstep(-0.25, 0.5, sunOrient);
     ds = mix(ds, 1.0, step(0.5, uModo));
