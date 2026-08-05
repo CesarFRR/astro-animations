@@ -259,7 +259,16 @@ export function distanciaTierraSol(sim, a) {
 
 export function crearTierraSola(scene, opts = {}) {
   const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true, crepusculo = false } = opts;
-  const tex = cargarTexturasSimples(manager);
+  const sencillas = cargarTexturasSimples(manager);
+  const loader = new THREE.TextureLoader(manager);
+  const tex = {
+    dia: loader.load(`${BASE}/textures/earth_daymap.webp`),
+    nubes: loader.load(`${BASE}/textures/earth_clouds.webp`),
+  };
+  tex.dia.colorSpace = THREE.SRGBColorSpace;
+  tex.dia.anisotropy = 8;
+  tex.nubes.colorSpace = THREE.SRGBColorSpace;
+  tex.nubes.anisotropy = 8;
 
   const tierra = new THREE.Group();
   const tierraTilt = new THREE.Group();
@@ -272,8 +281,8 @@ export function crearTierraSola(scene, opts = {}) {
       map: tex.dia,
       specular: new THREE.Color(0x333344),
       shininess: 18,
-      specularMap: tex.specular,
-      bumpMap: tex.bump,
+      specularMap: sencillas.specular,
+      bumpMap: sencillas.bump,
       bumpScale: 0.06,
     })
   );

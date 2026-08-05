@@ -5,9 +5,9 @@ import { crearTierraSola, updateTierraSola } from "/astro-animations/js/shared/t
 import { crearNavegacionTeclado } from "/astro-animations/js/shared/navegacion.js";
 
 const { renderer, scene, camera, controls, composer } = createScene({
-  bloomStrength: 1.3,
-  bloomRadius: 0.7,
-  bloomThreshold: 0.1,
+  bloomStrength: 0.4,
+  bloomRadius: 0.5,
+  bloomThreshold: 0.3,
   fogDensity: 0.003,
   cameraPos: [3.4, 2.1, 6.2],
 });
@@ -47,9 +47,6 @@ function animate() {
   const dt = clock.getDelta();
   tierra.luz.position.copy(camera.position);
   tierra.luz.target.position.copy(controls.target);
-  if (tierra.atmosfera) {
-    tierra.atmosfera.material.uniforms.uSunDir.value.copy(camera.position).normalize();
-  }
   if (playing && rotar) {
     updateTierraSola(tierra.sim, tierra, dt * speed);
   }
