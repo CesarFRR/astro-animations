@@ -14,6 +14,8 @@ export function cargarTexturasSimples(manager) {
   };
   tex.dia.colorSpace = THREE.SRGBColorSpace;
   tex.luces.colorSpace = THREE.SRGBColorSpace;
+  const ANISO = 8;
+  for (const t of Object.values(tex)) t.anisotropy = ANISO;
   return tex;
 }
 

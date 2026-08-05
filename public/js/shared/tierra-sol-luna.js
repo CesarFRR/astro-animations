@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { cargarTexturasSimples } from "/astro-animations/js/shared/textura-simple.js";
 
 const TAU = Math.PI * 2;
 const BASE = "/astro-animations";
@@ -64,6 +65,8 @@ export function createBase(scene, opts = {}) {
     atmosfera = true,
     manager = new THREE.LoadingManager(),
     tierraTextura = null,
+    tierraSpecular = null,
+    tierraBump = null,
   } = opts;
 
   const loader = new THREE.TextureLoader(manager);
@@ -107,8 +110,11 @@ export function createBase(scene, opts = {}) {
     tierraGeo,
     new THREE.MeshPhongMaterial({
       map: tex.tierra,
-      specular: new THREE.Color(0x444455),
-      shininess: 12,
+      specular: new THREE.Color(0x333344),
+      shininess: 18,
+      specularMap: tierraSpecular,
+      bumpMap: tierraBump,
+      bumpScale: 0.06,
     })
   );
   tierraMesh.userData.cuerpo = "tierra";
@@ -253,15 +259,7 @@ export function distanciaTierraSol(sim, a) {
 
 export function crearTierraSola(scene, opts = {}) {
   const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true, crepusculo = false } = opts;
-  const loader = new THREE.TextureLoader(manager);
-  const tex = {
-    tierra: loader.load(`${BASE}/textures/earth_daymap.webp`),
-    nubes: loader.load(`${BASE}/textures/earth_clouds.webp`),
-  };
-  tex.tierra.colorSpace = THREE.SRGBColorSpace;
-  tex.tierra.anisotropy = 8;
-  tex.nubes.colorSpace = THREE.SRGBColorSpace;
-  tex.nubes.anisotropy = 8;
+  const tex = cargarTexturasSimples(manager);
 
   const tierra = new THREE.Group();
   const tierraTilt = new THREE.Group();
@@ -271,9 +269,12 @@ export function crearTierraSola(scene, opts = {}) {
   const mesh = new THREE.Mesh(
     geo,
     new THREE.MeshPhongMaterial({
-      map: tex.tierra,
-      specular: new THREE.Color(0x444455),
-      shininess: 12,
+      map: tex.dia,
+      specular: new THREE.Color(0x333344),
+      shininess: 18,
+      specularMap: tex.specular,
+      bumpMap: tex.bump,
+      bumpScale: 0.06,
     })
   );
   tierraSpin.add(mesh);

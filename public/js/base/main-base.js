@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { createScene } from "/astro-animations/js/shared/setup.js";
 import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/starfield.js";
 import { createBase, updateBase, distanciaTierraSol } from "/astro-animations/js/shared/tierra-sol-luna.js";
+import { cargarTexturasSimples } from "/astro-animations/js/shared/textura-simple.js";
 
 const { renderer, scene, camera, controls, composer } = createScene({
   bloomStrength: 1.2,
@@ -13,6 +14,8 @@ const { renderer, scene, camera, controls, composer } = createScene({
 
 const sf = createStarfield(scene, 4000, 60, 500);
 
+const texSimples = cargarTexturasSimples();
+
 const base = createBase(scene, {
   a: 20,
   e: 0.0167,
@@ -20,6 +23,9 @@ const base = createBase(scene, {
   tierraRadio: 1.2,
   lunaRadio: 0.33,
   distLuna: 4,
+  tierraTextura: texSimples.dia,
+  tierraSpecular: texSimples.specular,
+  tierraBump: texSimples.bump,
 });
 
 const VELOCIDAD_ORBITAL = 29.78;

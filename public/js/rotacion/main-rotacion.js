@@ -26,6 +26,8 @@ const base = createBase(scene, {
   lunaRadio: 0.33,
   distLuna: 4,
   tierraTextura: texSimples.dia,
+  tierraSpecular: texSimples.specular,
+  tierraBump: texSimples.bump,
   mostrarNubes: false,
 });
 
