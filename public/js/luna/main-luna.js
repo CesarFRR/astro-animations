@@ -4,6 +4,7 @@ import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/star
 import { crearLunaSola, updateLunaSola } from "/astro-animations/js/shared/tierra-sol-luna.js";
 import { crearNavegacionTeclado } from "/astro-animations/js/shared/navegacion.js";
 import { crearLODTierra } from "/astro-animations/js/shared/lod-texturas.js";
+import { initPanelOpciones } from "/astro-animations/js/shared/panel-opciones.js";
 
 const { renderer, scene, camera, controls, composer } = createScene({
   bloomStrength: 0.6,
@@ -67,11 +68,7 @@ optSombra?.addEventListener("change", (e) => {
   luna.fill.intensity = e.target.checked ? 0 : 1.5;
 });
 
-document.querySelector(".controls")?.addEventListener("click", (e) => {
-  if (!e.target.closest(".opciones")) {
-    document.querySelectorAll("details.opciones[open]").forEach((d) => (d.open = false));
-  }
-});
+initPanelOpciones();
 
 const clock = new THREE.Clock();
 function animate() {
