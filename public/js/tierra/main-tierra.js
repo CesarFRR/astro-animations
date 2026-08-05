@@ -7,7 +7,7 @@ import { crearLODTierra } from "/astro-animations/js/shared/lod-texturas.js";
 import { initPanelOpciones } from "/astro-animations/js/shared/panel-opciones.js";
 
 const { renderer, scene, camera, controls, composer } = createScene({
-  bloomStrength: 0.15,
+  bloomStrength: 0.0,
   bloomRadius: 0.5,
   bloomThreshold: 0.6,
   fogDensity: 0.003,
@@ -27,14 +27,16 @@ const lodTierra = crearLODTierra(
   [
     { material: tierra.mesh.material, prop: "map" },
     { set: (t) => { tierra.uniforms.uNight.value = t; } },
+    { material: tierra.nubes1.material, uniform: "uClouds" },
   ],
   [
-    { max: null, texs: [tierra.tex.dia, tierra.tex.noche] },
+    { max: null, texs: [tierra.tex.dia, tierra.tex.noche, tierra.tex.nubes] },
     {
       max: 4.0,
       urls: [
         "/astro-animations/textures/max/4k_earth_daymap.webp",
         "/astro-animations/textures/max/4k_earth_nightmap.webp",
+        "/astro-animations/textures/max/4k_earth_clouds.webp",
       ],
       srgb: true,
     },
@@ -43,6 +45,7 @@ const lodTierra = crearLODTierra(
       urls: [
         "/astro-animations/textures/max/8k_earth_daymap.webp",
         "/astro-animations/textures/max/8k_earth_nightmap.webp",
+        "/astro-animations/textures/max/8k_earth_clouds.webp",
       ],
       srgb: true,
     },
@@ -113,6 +116,7 @@ function animate() {
   lodTierra.actualizarLOD(dt, dist);
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();
-  composer.render();
+  if (composer) composer.render();
+  else renderer.render(scene, camera);
 }
 animate();

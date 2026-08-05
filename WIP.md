@@ -319,3 +319,112 @@ npm run deploy         # deploy a GitHub Pages
 ```
 
 El `base` está configurado como `/astro-animations/` (GitHub Pages compat).
+
+---
+
+## 🧠 Lecciones aprendidas (sesiones 04–05 ago) — ¡LEER ANTES DE TOCAR SHADERS/POST!
+
+Trampas reales que costaron horas. Se documentan para no repetirlas.
+
+### 1. `onBeforeCompile` + `#include <chunk>`: no reemplaces la línea interna del chunk
+
+**Síntoma:** editabas `shader.fragmentShader.replace('roughnessFactor *= texelRoughness.g;', ...)` y daba `false` (no encontraba la string). La página no cambiaba nada → parecía "código muerto".
+
+**Causa:** en three.js, `material.onBeforeCompile` recibe el shader **antes** de que se expandan los
+`#include <nombre_chunk>`. Esas líneas internas viven DENTRO del chunk
+(`roughnessmap_fragment`, `meshphysical_fragment`, etc.) y en ese momento el shader aún tiene el texto
+literal `#include <roughnessmap_fragment>`. Por eso la string interna nunca existe ahí.
+
+**Fix correcto:** reemplazar el **include completo** por el código inline:
+
+```js
+shader.fragmentShader = shader.fragmentShader.replace(
+  '#include <roughnessmap_fragment>',
+  `float roughnessFactor = roughness;
+#ifdef USE_ROUGHNESSMAP
+	vec4 texelRoughness = texture2D( roughnessMap, vRoughnessMapUv );
+	roughnessFactor = 0.25 + 0.10 * texelRoughness.g;
+#endif`
+);
+```
+
+**Diagnóstico:** `console.log(shader.fragmentShader.includes('...'))` dentro del `onBeforeCompile` es la
+forma rápida de saber si el replace encontró su objetivo. El default de
+`material.customProgramCacheKey()` (`onBeforeCompile.toString()`) ya diferencia shaders: **no**
+sobreescribirlo a un string fijo si dos materiales tienen `onBeforeCompile` distintos (el caché de
+programas los confundiría).
+
+Keywords: `onBeforeCompile`, `customProgramCacheKey`, `#include`, roughness map, specular.
+
+### 2. EffectComposer + UnrealBloomPass cuestan ~9 renders fullscreen por frame
+
+**Síntoma:** gpu de la Tierra 28–44% vs 13–18% en el ejemplo oficial `webgpu_tsl_earth.html`.
+
+**Causa:** el ejemplo oficial hace `renderer.render(scene, camera)` **directo**, sin composer. Nosotros
+creábamos `EffectComposer` + `UnrealBloomPass` SIEMPRE, y el pass ejecutaba su cadena de blur completa
+(4 downsamples + 4 upsamples + composite ≈ 9 renders de pantalla completa) **aunque `bloomStrength`
+fuera 0.0**. Ese es el 90% del delta de GPU.
+
+**Fix aplicado (setup.js):** el composer (y por tanto el bloom) solo se crea si `bloomStrength > 0`:
+
+```js
+const composer = bloomStrength > 0 ? new EffectComposer(renderer) : null;
+bloom = composer ? new UnrealBloomPass(...) : null;
+```
+
+Y el loop usa `composer ? composer.render() : renderer.render(scene, camera)`.
+
+**Conclusión de diseño:** si una escena no necesita post, no metas composer. Se ahorra un 15–25% de GPU.
+
+### 3. El rendimiento del ejemplo TSL Earth viene de la simplicidad
+
+`webgpu_tsl_earth.html` (three.js examples): `renderer.render` directo, 1 `DirectionalLight(0xffffff, 2)`,
+sin shadow maps, sin fog costoso, `setPixelRatio(devicePixelRatio)`. Todo el "wow" es el shader TSL
+(remap de roughness `0.25→0.35`, canal G del mapa `earth_bump_roughness_clouds_4096.jpg`, nubes desde
+el canal B con `smoothstep(0.2, 1)`).
+
+Moraleja: replicar su **pipeline** (render directo) no su estética exacta; la estética puede salir del
+shader sin pagar post-procesado.
+
+### 4. Tambien visual: el "destello intenso solo en el mar" era despliegue
+
+El specular del mar (roughness baja 0.25) brilla más que la tierra (0.35) — normal en PBR. Pero el
+**bloom** lo convertía en un punto cegador si el threshold dejaba pasar solo el mar. Al bajar el bloom,
+el specular se ve difuso y también aparece en tierra firme, como el ejemplo. Confirmamos además que el
+canal G del `2k_earth_bump_roughness_clouds.webp` es idéntico al jpg oficial (histogramas con `magick`).
+
+### 5. LOD de texturas + nubes en paralelo (`crearLODTierra`)
+
+`crearLODTierra(materiales, niveles)` intercambia texturas en lockstep sin `dispose` (las deja en cache
+para el zoom repetido). Cada entrada del array `materiales` es `{ prop | set | uniform }` y cada nivel
+tiene urls paralelas. Se le añadió el slot `{ material: nubes, uniform: "uClouds" }` para que el día,
+la noche y las nubes cambien de resolución (8K, 4K, 2K) juntos según distancia. La nube `4k_earth_clouds`
+se generó desde la 8K con `magick ... -resize 4096x2048 -quality 85`.
+
+### 6. Panel de opciones: posicionar con `getBoundingClientRect`, nunca con distancias mágicas
+
+Módulo compartido `public/js/shared/panel-opciones.js` → `initPanelOpciones()`:
+- Lee el `getBoundingClientRect()` del `<summary>` en cada `toggle` y `resize`.
+- Clampa el panel a la ventana (`margen=12`) para que **nunca** se corte por la izquierda o derecha
+  (PC y móvil). Bottom = `innerHeight - top del summary + margen`, maxHeight = `top - margen`.
+- Clic en la barra de controles cierra cualquier `details[open]` (fallback táctil).
+
+Lección: `position: fixed` con offsets absolutos se rompe en móvil (viewport ≠ ventana visible); la
+geometría real del botón ancla es la única robusta.
+
+### 7. Móvil: apilar widgets con flex column, no con `bottom: Nrem` mágicos
+
+El hueco entre los widgets y la barra de opciones venía de `bottom: 10.5rem` fijo (altura real de la
+barra ≠ estimada). Fix: `.app-overlay` es `display:flex; flex-direction:column`, `.widgets-grid` es
+`flex:1` y los widgets del bloque inferior usan `margin-top:auto` → quedan pegados a `.controls` sin
+hueco y adaptan su altura real (timeline, wrap, etc.). Botón 👁 en `top-bar` (`widgets-hidden` sobre
+`.widgets-grid`) para modo "solo título + controles".
+
+### 8. Debug rápido en este repo (CDN + dev server)
+
+- Los shaders NO se generan de `public/` sino del **three.module.js de unpkg** (r160 en importmap). Si
+  dudas de una string: `curl -s https://unpkg.com/three@0.160.0/build/three.module.js | grep '...'`.
+- Siempre `Ctrl+Shift+R` (hard reload) al iterar shaders; `Ctrl+Shift+F` en devtools es *buscar*, no
+  recargar. El dev server de Astro sirve `public/` con `Cache-Control: no-cache`.
+- `node --check archivo.js` valida sintaxis sin importar `three`.
+- `.gitignore` no cubre `dist/` porque el deploy de GitHub Pages usa `gh-pages` desde `dist/`.

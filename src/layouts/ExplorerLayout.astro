@@ -31,13 +31,20 @@ const { title, subtitle = "", scriptSrc, navHref = "/astro-animations/", navLabe
   <canvas id="space-canvas"></canvas>
 
   <header class="top-bar">
-    <h1>{title}</h1>
-    <div class="subtitle">{subtitle}</div>
-    <a class="nav-link" href={navHref}>{navLabel}</a>
+    <div class="top-titles">
+      <h1>{title}</h1>
+      <div class="subtitle">{subtitle}</div>
+    </div>
+    <div class="top-actions desktop-only">
+      <a class="nav-link" href={navHref}>{navLabel}</a>
+    </div>
   </header>
 
   <section class="controls">
     <button id="btn-play" class="ctrl-btn">⏸</button>
+    <div class="controls-actions mobile-only">
+      <a class="nav-link" href={navHref}>{navLabel}</a>
+    </div>
     <slot name="controls" />
     <div class="speed-control">
       <label for="speed">Velocidad</label>

@@ -429,9 +429,12 @@ varying vec3 vPosW;
     );
 
     shader.fragmentShader = shader.fragmentShader.replace(
-      'roughnessFactor *= texelRoughness.g;',
-      `roughnessFactor *= texelRoughness.g;
-  roughnessFactor = 0.25 + 0.10 * roughnessFactor;`
+      '#include <roughnessmap_fragment>',
+      `float roughnessFactor = roughness;
+#ifdef USE_ROUGHNESSMAP
+	vec4 texelRoughness = texture2D( roughnessMap, vRoughnessMapUv );
+	roughnessFactor = 0.25 + 0.10 * texelRoughness.g;
+#endif`
     );
 
     shader.fragmentShader = shader.fragmentShader.replace(

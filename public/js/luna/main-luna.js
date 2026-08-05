@@ -7,7 +7,7 @@ import { crearLODTierra } from "/astro-animations/js/shared/lod-texturas.js";
 import { initPanelOpciones } from "/astro-animations/js/shared/panel-opciones.js";
 
 const { renderer, scene, camera, controls, composer } = createScene({
-  bloomStrength: 0.6,
+  bloomStrength: 0,
   bloomRadius: 0.5,
   bloomThreshold: 0.3,
   fogDensity: 0.003,
@@ -83,6 +83,7 @@ function animate() {
   lodLuna.actualizarLOD(dt, dist);
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();
-  composer.render();
+  if (composer) composer.render();
+  else renderer.render(scene, camera);
 }
 animate();

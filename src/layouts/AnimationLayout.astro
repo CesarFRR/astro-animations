@@ -34,9 +34,14 @@ const { title, subtitle, scriptSrc, navHref = "/astro-animations/", navLabel = "
 
   <div class="app-overlay">
     <header class="top-bar">
-      <h1>{title}</h1>
-      <div class="subtitle">{subtitle}</div>
-      <a class="nav-link" href={navHref}>{navLabel}</a>
+      <div class="top-titles">
+        <h1>{title}</h1>
+        <div class="subtitle">{subtitle}</div>
+      </div>
+      <div class="top-actions desktop-only">
+        <button class="eye-btn" title="Ocultar o mostrar los widgets" aria-label="Ocultar o mostrar los widgets">👁</button>
+        <a class="nav-link" href={navHref}>{navLabel}</a>
+      </div>
     </header>
 
     <main class="widgets-grid">
@@ -55,6 +60,10 @@ const { title, subtitle, scriptSrc, navHref = "/astro-animations/", navLabel = "
 
     <section class="controls">
       <button id="btn-play" class="ctrl-btn">⏸ Pausar</button>
+      <div class="controls-actions mobile-only">
+        <button class="eye-btn" title="Ocultar o mostrar los widgets" aria-label="Ocultar o mostrar los widgets">👁</button>
+        <a class="nav-link" href={navHref}>{navLabel}</a>
+      </div>
       <slot name="controls" />
       <div class="speed-control">
         <label for="speed">Velocidad</label>
@@ -76,6 +85,16 @@ const { title, subtitle, scriptSrc, navHref = "/astro-animations/", navLabel = "
   </div>
 
   <slot />
+
+  <script>
+    const botonesOjo = document.querySelectorAll(".eye-btn");
+    botonesOjo.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const oculto = document.body.classList.toggle("widgets-hidden");
+        botonesOjo.forEach((b) => b.classList.toggle("active", oculto));
+      });
+    });
+  </script>
 
   <script type="module" src={`${base}/${scriptSrc}`}></script>
 </body>
