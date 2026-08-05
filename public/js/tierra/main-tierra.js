@@ -44,7 +44,6 @@ const lodTierra = crearLODTierra(
         "/astro-animations/textures/max/8k_earth_nightmap.webp",
       ],
       srgb: true,
-      liberar: true,
     },
   ]
 );
@@ -68,6 +67,39 @@ speedSelect.addEventListener("change", (e) => {
   speed = parseFloat(e.target.value);
 });
 
+function setSeg(botones, clave, valor) {
+  botones.forEach((b) => b.classList.toggle("active", b.dataset[clave] === String(valor)));
+}
+
+const optNubes = document.getElementById("opt-nubes");
+const optAtmosfera = document.getElementById("opt-atmosfera");
+const segIlum = document.querySelectorAll("#opt-iluminacion button");
+const segCalidad = document.querySelectorAll("#opt-calidad button");
+
+optNubes?.addEventListener("change", (e) => {
+  tierra.uniforms.uNubes.value = e.target.checked ? 1 : 0;
+});
+optAtmosfera?.addEventListener("change", (e) => {
+  if (tierra.atmosfera) tierra.atmosfera.visible = e.target.checked;
+});
+segIlum.forEach((b) => {
+  b.addEventListener("click", () => {
+    const modo = Number(b.dataset.modo);
+    tierra.uniforms.uModo.value = modo;
+    setSeg(segIlum, "modo", modo);
+  });
+});
+segCalidad.forEach((b) => {
+  b.addEventListener("click", () => {
+    const cal = b.dataset.calidad;
+    setSeg(segCalidad, "calidad", cal);
+    if (cal === "auto") lodTierra.volverAuto();
+    else if (cal === "bajo") lodTierra.forzar(0);
+    else if (cal === "equilibrado") lodTierra.forzar(1);
+    else lodTierra.forzar(2);
+  });
+});
+
 const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
@@ -77,7 +109,7 @@ function animate() {
   }
   navegar(dt);
   const dist = camera.position.distanceTo(controls.target);
-  lodTierra(dt, dist);
+  lodTierra.actualizarLOD(dt, dist);
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();
   composer.render();

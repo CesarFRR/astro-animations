@@ -2,9 +2,38 @@
 import ExplorerLayout from '../../layouts/ExplorerLayout.astro';
 ---
 <ExplorerLayout
-  title="Tierra — Vuelo Libre"
+  title="La Tierra"
   subtitle="Arrastra para orbitar · Botón derecho / WASD para moverte · Rueda para zoom"
   scriptSrc="js/tierra/main-tierra.js"
 >
-  <button id="btn-rotar" class="ctrl-btn muted" slot="controls">⟳ Girar (OFF)</button>
+  <div slot="controls" class="panel-opciones">
+    <button id="btn-rotar" class="ctrl-btn muted">⟳ Girar (OFF)</button>
+    <details class="opciones">
+      <summary>⚙ Opciones</summary>
+      <div class="opciones-cuerpo">
+        <div class="opciones-toggles">
+          <label class="chk"><input type="checkbox" id="opt-nubes" checked> Nubes</label>
+          <label class="chk"><input type="checkbox" id="opt-atmosfera" checked> Atmósfera</label>
+        </div>
+        <div class="opciones-fila">
+          <span class="opciones-etiqueta">Luz</span>
+          <div class="seg" id="opt-iluminacion">
+            <button type="button" data-modo="0" class="active">Día/Noche</button>
+            <button type="button" data-modo="1">Solo día</button>
+            <button type="button" data-modo="2">Solo noche</button>
+          </div>
+        </div>
+        <div class="opciones-fila">
+          <span class="opciones-etiqueta">Calidad</span>
+          <div class="seg" id="opt-calidad">
+            <button type="button" data-calidad="auto" class="active">Auto</button>
+            <button type="button" data-calidad="bajo">Bajo</button>
+            <button type="button" data-calidad="equilibrado">Equil.</button>
+            <button type="button" data-calidad="alto">Alto</button>
+            <button type="button" data-calidad="ultra">Ultra</button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
 </ExplorerLayout>

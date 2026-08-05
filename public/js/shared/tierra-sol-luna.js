@@ -63,6 +63,8 @@ const TIERRA_FRAGMENT = /* glsl */ `
   uniform vec3 uSunDir;
   uniform vec3 uAtmDay;
   uniform vec3 uAtmTwilight;
+  uniform float uNubes;
+  uniform float uModo;
   varying vec3 vNormalW;
   varying vec3 vPosW;
   varying vec2 vUv;
@@ -78,9 +80,9 @@ const TIERRA_FRAGMENT = /* glsl */ `
     vec3 day = texture(uDay, vUv).rgb;
     vec3 night = texture(uNight, vUv).rgb;
     vec3 detail = texture(uDetail, vUv).rgb;
-    float clouds = smoothstep(0.2, 1.0, detail.b);
+    float clouds = smoothstep(0.2, 1.0, detail.b) * uNubes;
 
-    vec3 base = mix(day, vec3(1.0), clouds * 2.0);
+    vec3 base = mix(day, vec3(1.0), clouds * 0.4);
 
     float h = detail.r;
     float hx = texture(uDetail, vUv + vec2(0.002, 0.0)).r;
@@ -89,17 +91,19 @@ const TIERRA_FRAGMENT = /* glsl */ `
     vec3 n = normalize(normal + vec3(hx - h, hy - h, 0.0) * 6.0);
 
     float ndl = max(dot(n, sunDir), 0.0);
-    vec3 lit = base * (0.08 + 0.92 * ndl);
+    vec3 lit = base * (0.16 + 0.84 * ndl);
 
     float rough = clamp(detail.g, 0.05, 1.0);
     float spec = pow(max(dot(reflect(-sunDir, n), viewDir), 0.0), mix(6.0, 60.0, 1.0 - rough));
-    lit += vec3(0.9, 0.95, 1.0) * spec * 0.4 * smoothstep(0.0, 0.5, sunOrient);
+    lit += vec3(0.9, 0.95, 1.0) * spec * 0.22 * smoothstep(0.0, 0.5, sunOrient);
 
-    float dayStrength = smoothstep(-0.25, 0.5, sunOrient);
-    vec3 color = mix(night, lit, dayStrength);
+    float ds = smoothstep(-0.25, 0.5, sunOrient);
+    ds = mix(ds, 1.0, step(0.5, uModo));
+    ds = mix(ds, 0.0, step(1.5, uModo));
+    vec3 color = mix(night, lit, ds);
 
     vec3 atmo = mix(uAtmTwilight, uAtmDay, smoothstep(-0.25, 0.75, sunOrient));
-    float atmoMix = clamp(smoothstep(-0.5, 1.0, sunOrient) * fresnel * fresnel, 0.0, 1.0);
+    float atmoMix = clamp(smoothstep(-0.5, 1.0, sunOrient) * fresnel * fresnel, 0.0, 1.0) * 0.6;
     color = mix(color, atmo, atmoMix);
 
     gl_FragColor = vec4(color, 1.0);
@@ -346,6 +350,8 @@ export function crearTierraSola(scene, opts = {}) {
     uSunDir: { value: sunDir.clone().normalize() },
     uAtmDay: { value: ATM_DIA.clone() },
     uAtmTwilight: { value: ATM_CREPUSCULO.clone() },
+    uNubes: { value: 1 },
+    uModo: { value: 0 },
   };
 
   const mesh = new THREE.Mesh(
