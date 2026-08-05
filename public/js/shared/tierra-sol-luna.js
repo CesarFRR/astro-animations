@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { cargarTexturasSimples } from "/astro-animations/js/shared/textura-simple.js";
 
 const TAU = Math.PI * 2;
 const BASE = "/astro-animations";
@@ -41,6 +40,69 @@ const ATM_FRAGMENT = /* glsl */ `
     float alpha = pow(clamp(1.0 - (fresnel - 0.73) / 0.27, 0.0, 1.0), 3.0)
       * smoothstep(-0.5, 1.0, sunOrient);
     gl_FragColor = vec4(atmosColor, alpha);
+  }
+`;
+
+const TIERRA_VERTEX = /* glsl */ `
+  varying vec3 vNormalW;
+  varying vec3 vPosW;
+  varying vec2 vUv;
+  void main() {
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    vNormalW = normalize(mat3(modelMatrix) * normal);
+    vPosW = wp.xyz;
+    vUv = uv;
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`;
+
+const TIERRA_FRAGMENT = /* glsl */ `
+  uniform sampler2D uDay;
+  uniform sampler2D uNight;
+  uniform sampler2D uDetail;
+  uniform vec3 uSunDir;
+  uniform vec3 uAtmDay;
+  uniform vec3 uAtmTwilight;
+  varying vec3 vNormalW;
+  varying vec3 vPosW;
+  varying vec2 vUv;
+
+  void main() {
+    vec3 normal = normalize(vNormalW);
+    vec3 viewDir = normalize(cameraPosition - vPosW);
+    vec3 sunDir = normalize(uSunDir);
+
+    float sunOrient = dot(normal, sunDir);
+    float fresnel = 1.0 - abs(dot(normal, viewDir));
+
+    vec3 day = texture(uDay, vUv).rgb;
+    vec3 night = texture(uNight, vUv).rgb;
+    vec3 detail = texture(uDetail, vUv).rgb;
+    float clouds = smoothstep(0.2, 1.0, detail.b);
+
+    vec3 base = mix(day, vec3(1.0), clouds * 2.0);
+
+    float h = detail.r;
+    float hx = texture(uDetail, vUv + vec2(0.002, 0.0)).r;
+    float hy = texture(uDetail, vUv + vec2(0.0, 0.002)).r;
+    float bump = max(h, clouds);
+    vec3 n = normalize(normal + vec3(hx - h, hy - h, 0.0) * 6.0);
+
+    float ndl = max(dot(n, sunDir), 0.0);
+    vec3 lit = base * (0.08 + 0.92 * ndl);
+
+    float rough = clamp(detail.g, 0.05, 1.0);
+    float spec = pow(max(dot(reflect(-sunDir, n), viewDir), 0.0), mix(6.0, 60.0, 1.0 - rough));
+    lit += vec3(0.9, 0.95, 1.0) * spec * 0.4 * smoothstep(0.0, 0.5, sunOrient);
+
+    float dayStrength = smoothstep(-0.25, 0.5, sunOrient);
+    vec3 color = mix(night, lit, dayStrength);
+
+    vec3 atmo = mix(uAtmTwilight, uAtmDay, smoothstep(-0.25, 0.75, sunOrient));
+    float atmoMix = clamp(smoothstep(-0.5, 1.0, sunOrient) * fresnel * fresnel, 0.0, 1.0);
+    color = mix(color, atmo, atmoMix);
+
+    gl_FragColor = vec4(color, 1.0);
   }
 `;
 
@@ -258,61 +320,51 @@ export function distanciaTierraSol(sim, a) {
 }
 
 export function crearTierraSola(scene, opts = {}) {
-  const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true, crepusculo = false } = opts;
-  const sencillas = cargarTexturasSimples(manager);
+  const { radio = 1.2, manager = new THREE.LoadingManager(), atmosfera = true, sunDir = new THREE.Vector3(0, 0, 1) } = opts;
   const loader = new THREE.TextureLoader(manager);
   const tex = {
     dia: loader.load(`${BASE}/textures/normal/earth_daymap.webp`),
-    nubes: loader.load(`${BASE}/textures/normal/earth_clouds.webp`),
+    noche: loader.load(`${BASE}/textures/max/2k_earth_nightmap.webp`),
+    detalle: loader.load(`${BASE}/textures/max/2k_earth_detail.webp`),
   };
   tex.dia.colorSpace = THREE.SRGBColorSpace;
   tex.dia.anisotropy = 8;
-  tex.nubes.colorSpace = THREE.SRGBColorSpace;
-  tex.nubes.anisotropy = 8;
+  tex.noche.colorSpace = THREE.SRGBColorSpace;
+  tex.noche.anisotropy = 8;
+  tex.detalle.anisotropy = 8;
 
   const tierra = new THREE.Group();
   const tierraTilt = new THREE.Group();
   tierraTilt.rotation.z = TILT_ECLIPTICA;
   const tierraSpin = new THREE.Group();
   const geo = new THREE.SphereGeometry(radio, 96, 64);
+
+  const uniforms = {
+    uDay: { value: tex.dia },
+    uNight: { value: tex.noche },
+    uDetail: { value: tex.detalle },
+    uSunDir: { value: sunDir.clone().normalize() },
+    uAtmDay: { value: ATM_DIA.clone() },
+    uAtmTwilight: { value: ATM_CREPUSCULO.clone() },
+  };
+
   const mesh = new THREE.Mesh(
     geo,
-    new THREE.MeshPhongMaterial({
-      map: tex.dia,
-      specular: new THREE.Color(0x333344),
-      shininess: 18,
-      specularMap: sencillas.specular,
-      bumpMap: sencillas.bump,
-      bumpScale: 0.06,
+    new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader: TIERRA_VERTEX,
+      fragmentShader: TIERRA_FRAGMENT,
     })
   );
   tierraSpin.add(mesh);
-  const nubes = new THREE.Mesh(
-    geo,
-    new THREE.MeshPhongMaterial({
-      map: tex.nubes,
-      transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    })
-  );
-  nubes.scale.setScalar(1.02);
-  tierraSpin.add(nubes);
   tierraTilt.add(tierraSpin);
   tierra.add(tierraTilt);
   scene.add(tierra);
 
-  const luz = new THREE.DirectionalLight(0xfff1d0, 1.15);
-  luz.position.set(30, 15, 25);
-  scene.add(luz);
-  scene.add(luz.target);
   scene.add(new THREE.AmbientLight(0x223355, 0.35));
 
   let atmosferaMesh = null;
   if (atmosfera) {
-    const dirSol = luz.position.clone().normalize();
-    const twilight = crepusculo ? ATM_CREPUSCULO.clone() : ATM_DIA.clone();
     atmosferaMesh = new THREE.Mesh(
       geo,
       new THREE.ShaderMaterial({
@@ -320,9 +372,9 @@ export function crearTierraSola(scene, opts = {}) {
         transparent: true,
         depthWrite: false,
         uniforms: {
-          uSunDir: { value: dirSol },
+          uSunDir: { value: uniforms.uSunDir.value.clone() },
           uDayColor: { value: ATM_DIA.clone() },
-          uTwilightColor: { value: twilight },
+          uTwilightColor: { value: ATM_CREPUSCULO.clone() },
         },
         vertexShader: ATM_VERTEX,
         fragmentShader: ATM_FRAGMENT,
@@ -333,7 +385,7 @@ export function crearTierraSola(scene, opts = {}) {
   }
 
   const sim = { dias: 0 };
-  return { tierra, tierraTilt, tierraSpin, mesh, nubes, atmosfera: atmosferaMesh, luz, sim, tex, manager, radio };
+  return { tierra, tierraTilt, tierraSpin, mesh, atmosfera: atmosferaMesh, uniforms, sim, tex, manager, radio };
 }
 
 export function updateTierraSola(sim, refs, dt) {

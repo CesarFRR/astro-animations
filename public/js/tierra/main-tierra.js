@@ -22,11 +22,32 @@ const sf = createStarfield(scene, 4000, 60, 500);
 
 const tierra = crearTierraSola(scene, {});
 const navegar = crearNavegacionTeclado(camera, controls);
-const lodTierra = crearLODTierra(tierra.mesh, [
-  { min: null, max: null, tex: tierra.tex.dia },
-  { min: null, max: 4.0, url: "/astro-animations/textures/max/4k_earth_daymap.webp" },
-  { min: null, max: 2.4, url: "/astro-animations/textures/max/8k_earth_daymap.webp", liberar: true },
-]);
+const lodTierra = crearLODTierra(
+  [
+    { material: tierra.mesh.material, uniform: "uDay" },
+    { material: tierra.mesh.material, uniform: "uNight" },
+  ],
+  [
+    { max: null, texs: [tierra.tex.dia, tierra.tex.noche] },
+    {
+      max: 4.0,
+      urls: [
+        "/astro-animations/textures/max/4k_earth_daymap.webp",
+        "/astro-animations/textures/max/4k_earth_nightmap.webp",
+      ],
+      srgb: true,
+    },
+    {
+      max: 2.4,
+      urls: [
+        "/astro-animations/textures/max/8k_earth_daymap.webp",
+        "/astro-animations/textures/max/8k_earth_nightmap.webp",
+      ],
+      srgb: true,
+      liberar: true,
+    },
+  ]
+);
 
 let playing = true;
 let rotar = false;
@@ -51,8 +72,6 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
-  tierra.luz.position.copy(camera.position);
-  tierra.luz.target.position.copy(controls.target);
   if (playing && rotar) {
     updateTierraSola(tierra.sim, tierra, dt * speed);
   }
