@@ -426,14 +426,14 @@ varying vec3 vPosW;
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <map_fragment>',
       `#include <map_fragment>
-  float cloudsStr = smoothstep(0.2, 1.0, texture2D(uDetail, vUv).b);
+  float cloudsStr = smoothstep(0.2, 1.0, texture2D(uDetail, vMapUv).b);
   diffuseColor.rgb = mix(diffuseColor.rgb, vec3(1.0), cloudsStr * 2.0);`
     );
 
     shader.fragmentShader = shader.fragmentShader.replace(
       'roughnessFactor *= texelRoughness.g;',
       `roughnessFactor *= texelRoughness.g;
-  float cStr = smoothstep(0.2, 1.0, texture2D(uDetail, vUv).b);
+  float cStr = smoothstep(0.2, 1.0, texture2D(uDetail, vMapUv).b);
   roughnessFactor = max(roughnessFactor, step(0.01, cStr));
   roughnessFactor = 0.25 + 0.10 * roughnessFactor;`
     );
@@ -441,7 +441,7 @@ varying vec3 vPosW;
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <opaque_fragment>',
       `{
-  vec3 nightColor = texture2D(uNight, vUv).rgb;
+  vec3 nightColor = texture2D(uNight, vMapUv).rgb;
   float sunOrient = dot(normalize(vNormalW), normalize(uSunDir));
   float ds = smoothstep(-0.25, 0.5, sunOrient);
   ds = mix(ds, 1.0, step(0.5, uModo));
