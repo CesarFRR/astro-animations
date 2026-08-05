@@ -10,7 +10,7 @@ const { renderer, scene, camera, controls, composer } = createScene({
   bloomRadius: 0.5,
   bloomThreshold: 0.3,
   fogDensity: 0.003,
-  cameraPos: [3.4, 2.1, 6.2],
+  cameraPos: [2.2, 1.3, 4.5],
 });
 
 controls.minDistance = 1.5;
@@ -57,11 +57,11 @@ const rotarBtn = document.getElementById("btn-rotar");
 const speedSelect = document.getElementById("speed");
 playBtn.addEventListener("click", () => {
   playing = !playing;
-  playBtn.textContent = playing ? "⏸ Pausar" : "▶ Reproducir";
+  playBtn.textContent = playing ? "⏸" : "▶";
 });
 rotarBtn.addEventListener("click", () => {
   rotar = !rotar;
-  rotarBtn.textContent = rotar ? "⟳ Girar (ON)" : "⟳ Girar (OFF)";
+  rotarBtn.textContent = "⟳";
   rotarBtn.classList.toggle("muted", !rotar);
 });
 speedSelect.addEventListener("change", (e) => {

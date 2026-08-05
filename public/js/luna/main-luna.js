@@ -10,10 +10,10 @@ const { renderer, scene, camera, controls, composer } = createScene({
   bloomRadius: 0.5,
   bloomThreshold: 0.3,
   fogDensity: 0.003,
-  cameraPos: [2.6, 1.4, 5.2],
+  cameraPos: [1.2, 0.6, 2.5],
 });
 
-controls.minDistance = 0.2;
+controls.minDistance = 0.01;
 controls.maxDistance = 60;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 1.1;
@@ -40,11 +40,11 @@ const rotarBtn = document.getElementById("btn-rotar");
 const speedSelect = document.getElementById("speed");
 playBtn.addEventListener("click", () => {
   playing = !playing;
-  playBtn.textContent = playing ? "⏸ Pausar" : "▶ Reproducir";
+  playBtn.textContent = playing ? "⏸" : "▶";
 });
 rotarBtn.addEventListener("click", () => {
   rotar = !rotar;
-  rotarBtn.textContent = rotar ? "⟳ Girar (ON)" : "⟳ Girar (OFF)";
+  rotarBtn.textContent = "⟳";
   rotarBtn.classList.toggle("muted", !rotar);
 });
 speedSelect.addEventListener("change", (e) => {
@@ -65,6 +65,11 @@ segCalidad.forEach((b) => {
     else if (cal === "equilibrado") lodLuna.forzar(1);
     else lodLuna.forzar(2);
   });
+});
+
+const optSombra = document.getElementById("opt-sombra");
+optSombra?.addEventListener("change", (e) => {
+  luna.luz.intensity = e.target.checked ? 1.0 : 0;
 });
 
 const clock = new THREE.Clock();
