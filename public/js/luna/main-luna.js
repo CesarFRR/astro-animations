@@ -78,6 +78,7 @@ function animate() {
     updateLunaSola(luna.sim, luna, dt * speed);
   }
   navegar(dt);
+  luna.fill.position.copy(camera.position);
   const dist = camera.position.distanceTo(controls.target);
   lodLuna.actualizarLOD(dt, dist);
   updateTwinkle(sf, clock.elapsedTime);
