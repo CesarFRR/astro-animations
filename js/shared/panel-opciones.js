@@ -6,20 +6,26 @@ export function initPanelOpciones() {
       if (!summary || !cuerpo) return;
       const margen = 12;
       const r = summary.getBoundingClientRect();
-      const ancho = Math.min(320, window.innerWidth - margen * 2);
+      const ancho = Math.min(360, window.innerWidth - margen * 2);
       let left = Math.min(r.left, window.innerWidth - ancho - margen);
       left = Math.max(margen, left);
       cuerpo.style.position = "fixed";
       cuerpo.style.left = left + "px";
+      cuerpo.style.top = "auto";
       cuerpo.style.bottom = Math.max(margen, window.innerHeight - r.top + margen) + "px";
       cuerpo.style.width = ancho + "px";
       cuerpo.style.maxWidth = ancho + "px";
       cuerpo.style.maxHeight = Math.max(120, r.top - margen) + "px";
+      cuerpo.style.opacity = "1";
     });
   };
 
   document.querySelectorAll("details.opciones").forEach((d) => {
-    d.addEventListener("toggle", posicionar);
+    d.addEventListener("toggle", () => {
+      const cuerpo = d.querySelector(".opciones-cuerpo");
+      if (cuerpo) cuerpo.style.opacity = "0";
+      requestAnimationFrame(posicionar);
+    });
   });
   window.addEventListener("resize", posicionar);
 

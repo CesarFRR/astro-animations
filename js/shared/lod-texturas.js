@@ -20,20 +20,32 @@ export function crearLODTierra(materiales, niveles) {
     cargando[i] = Promise.all(
       n.urls.map(
         (url) =>
-          new Promise((resolve) => {
+          new Promise((resolve, reject) => {
             loader.load(url, (t) => {
               if (n.srgb) t.colorSpace = THREE.SRGBColorSpace;
               t.anisotropy = ANISO;
               resolve(t);
-            });
+            }, undefined, reject);
           })
       )
     ).then((ts) => {
       cache[i] = ts;
       cargando[i] = null;
       return ts;
+    }, (err) => {
+      console.warn(`[LOD] error cargando nivel ${i}:`, err);
+      cargando[i] = null;
+      return null;
     });
     return cargando[i];
+  }
+
+  function nivelDeseado(dist) {
+    let n = 0;
+    for (let i = 0; i < niveles.length; i++) {
+      if (dist <= (niveles[i].max ?? Infinity)) n = i;
+    }
+    return n;
   }
 
   function aplicar(i) {
@@ -44,8 +56,19 @@ export function crearLODTierra(materiales, niveles) {
       if (m.set) {
         m.set(ts[k % ts.length]);
       } else if (m.prop) {
-        m.material[m.prop] = ts[k % ts.length];
-        m.material.needsUpdate = true;
+        if (m.material[m.prop] !== ts[k % ts.length]) {
+          m.material[m.prop] = ts[k % ts.length];
+          m.material.needsUpdate = true;
+        }
+      } else if (m.uniformPrev) {
+        const t = ts[k % ts.length];
+        if (m.linear) {
+          t.colorSpace = THREE.NoColorSpace;
+          t.needsUpdate = true;
+        }
+        m.material.uniforms[m.uniformPrev].value = m.material.uniforms[m.uniform].value;
+        m.material.uniforms[m.uniform].value = t;
+        m.material.uniforms[m.uniformBlend].value = 0.0;
       } else {
         m.material.uniforms[m.uniform].value = ts[k % ts.length];
       }
@@ -68,20 +91,32 @@ export function crearLODTierra(materiales, niveles) {
   }
 
   function actualizarLOD(dt, dist) {
+    for (let k = 0; k < materiales.length; k++) {
+      const m = materiales[k];
+      if (m.uniformBlend) {
+        m.material.uniforms[m.uniformBlend].value = Math.min(
+          1.0,
+          m.material.uniforms[m.uniformBlend].value + dt * 1.5
+        );
+      }
+    }
     if (forzado !== null) {
-      if (!aplicar(forzado)) cargar(forzado);
+      if (actual !== forzado && !aplicar(forzado)) cargar(forzado);
       return;
     }
-    let nivel = 0;
-    for (let i = 0; i < niveles.length; i++) {
-      if (dist <= (niveles[i].max ?? Infinity)) nivel = i;
-    }
-    if (nivel === actual) return;
-    if (!cache[nivel]) {
-      cargar(nivel);
+    const deseado = nivelDeseado(dist);
+    if (deseado === actual) return;
+    if (cache[deseado]) {
+      aplicar(deseado);
       return;
     }
-    aplicar(nivel);
+    const carga = cargar(deseado);
+    if (carga) carga.then((ts) => {
+      if (ts && nivelDeseado(dist) === deseado) aplicar(deseado);
+    });
+    let retroceso = deseado - 1;
+    while (retroceso > actual && !cache[retroceso]) retroceso--;
+    if (retroceso > actual) aplicar(retroceso);
   }
 
   return { actualizarLOD, forzar, volverAuto, precargarTodo };
