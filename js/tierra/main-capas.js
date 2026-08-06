@@ -8,12 +8,6 @@ const explorador = iniciarExploradorTierra({
   minDistance: 0.4,
 });
 
-// Profundidad del corte (constante común de los tres planos de clipping).
-const optCorte = document.getElementById("opt-corte");
-optCorte?.addEventListener("input", (e) => {
-  explorador.setCorteValor(parseFloat(e.target.value));
-});
-
 // Visibilidad individual de cada capa.
 const POR_CAPA = [
   ["opt-capa-nucleo-interno", "nucleo-interno"],
