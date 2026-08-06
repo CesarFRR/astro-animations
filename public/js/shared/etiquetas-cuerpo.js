@@ -111,6 +111,8 @@ export function crearEtiquetasCuerpo(scene, objetivo, opts = {}) {
     // Región angular [cerca(°), lejos(°)]
     thetaAng = [30, 80],
     thetaRango = [0.75, 2.2],
+    // Callback al cerrar el panel (reanudar animación, cancelar fly, etc.)
+    onCerrar = null,
   } = opts;
   const grupo = new THREE.Group();
   grupo.visible = true;
@@ -214,7 +216,7 @@ export function crearEtiquetasCuerpo(scene, objetivo, opts = {}) {
   }
 
   // ===== Click en etiqueta: detener + volar + panel =====
-  const panel = crearPanel();
+  const panel = crearPanel(onCerrar);
   const rayoClick = new THREE.Raycaster();
   const mouseClick = new THREE.Vector2();
   let ptrInicio = null;
@@ -405,7 +407,7 @@ export function crearEtiquetasCuerpo(scene, objetivo, opts = {}) {
 }
 
 // ===== Panel lateral de detalle (click en etiqueta) =====
-function crearPanel() {
+function crearPanel(onCerrar) {
   const panel = document.createElement("aside");
   panel.className = "luna-panel";
   panel.style.cssText =
@@ -426,6 +428,7 @@ function crearPanel() {
   document.body.appendChild(panel);
   panel.querySelector("#luna-panel-cerrar").addEventListener("click", () => {
     panel.style.transform = "translateX(105%)";
+    if (typeof onCerrar === "function") onCerrar();
   });
   return panel;
 }
