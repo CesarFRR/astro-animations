@@ -1,56 +1,96 @@
 import * as THREE from "three";
 
-// ===== Capas internas de la Tierra (tajada de pastel con clipIntersection) =====
-// Técnica del ejemplo oficial de three.js "webgl_clipping_intersection":
-// tres planos ortogonales recortan una cuña ("tajada") de la esfera y dejan
-// visible el resto (7/8 de la superficie). Por la tajada se ven las capas
-// internas como rodajas macizas 3D, bien desde cualquier ángulo.
+// ===== Capas internas de la Tierra (tajada de pastel con paredes sólidas) =====
 //
-// Con clipIntersection=true se conserva la UNIÓN de los half-spaces positivos:
-// dot(normal, p) + const >= 0. El hueco es la intersección de los half-spaces
-// negativos: x<0 AND y<0 AND z<0, que es justo la dirección de la cámara
-// inicial de tierra-capas ([1.4, 0.9, 2.6]).
+// En lugar de esferas concéntricas recortadas (que se ven huecas por dentro),
+// la tajada muestra tres PAREDES PLANAS SÓLIDAS: cada cara del octante que se
+// recorta va desde el centro de la Tierra hasta la superficie, como una línea
+// desde cada vértice del corte hasta el centro. Cada pared se divide en
+// segmentos concéntricos que son las capas (núcleo interno, núcleo externo,
+// manto y corteza), de modo que el interior se ve macizo, como una tajada de
+// pastel.
 //
-// Radios reales (fracción del radio terrestre 6371 km):
-//   núcleo interno 1221 km (0.19), núcleo externo 3480 km (0.55),
-//   manto 6340 km (0.995), corteza 6371 km (1.0). La corteza se exagera
-//   ligeramente para que sea visible.
+// El hueco es el octante x>0, y>0, z>0 (en el espacio local). Con
+// clipIntersection=true (unión de half-spaces) se descarta ese octante y se
+// conserva el resto de la esfera; las paredes llenan las tres caras del hueco:
+//   - pared en el plano x=0  → cuadrante y>0, z>0
+//   - pared en el plano y=0  → cuadrante x>0, z>0
+//   - pared en el plano z=0  → cuadrante x>0, y>0
+//
+// La orientación del hueco (hacia la cámara o el lado iluminado) la decide el
+// explorador rotando el grupo con un quaternion.
 
 const CAPAS = [
   { id: "nucleo-interno", nombre: "Núcleo interno", radio: 0.19, color: 0xffd777 },
   { id: "nucleo-externo", nombre: "Núcleo externo", radio: 0.55, color: 0xe8943a },
   { id: "manto", nombre: "Manto", radio: 0.93, color: 0x9a5a35 },
-  { id: "corteza", nombre: "Corteza", radio: 0.995, color: 0x3f9d78 },
+  { id: "corteza", nombre: "Corteza", radio: 1.0, color: 0x3f9d78 },
 ];
 
-export function crearCapasTierra(contenedor, opts = {}) {
-  const { radio = 1.2, corte = 0 } = opts;
+// Sector anular de 90° en el cuadrante positivo (ángulos 0..90°), en el plano
+// XY, entre los radios r0 y r1.
+function sectorAnular(r0, r1, segments = 64) {
+  const a0 = 0;
+  const a1 = Math.PI / 2;
+  const shape = new THREE.Shape();
+  for (let i = 0; i <= segments; i++) {
+    const a = a0 + ((a1 - a0) * i) / segments;
+    const p = new THREE.Vector2(Math.cos(a) * r1, Math.sin(a) * r1);
+    if (i === 0) shape.moveTo(p.x, p.y);
+    else shape.lineTo(p.x, p.y);
+  }
+  for (let i = segments; i >= 0; i--) {
+    const a = a0 + ((a1 - a0) * i) / segments;
+    const p = new THREE.Vector2(Math.cos(a) * r0, Math.sin(a) * r0);
+    shape.lineTo(p.x, p.y);
+  }
+  shape.closePath();
+  return shape;
+}
 
-  // Tres planos ortogonales con el hueco hacia la cámara inicial.
+export function crearCapasTierra(contenedor, opts = {}) {
+  const { radio = 1.2 } = opts;
+
+  // Tres planos ortogonales (espacio local): el hueco es x>0, y>0, z>0.
+  // La constante es 0: los planos pasan por el centro de la Tierra.
   const planos = [
-    new THREE.Plane(new THREE.Vector3(1, 0, 0), corte),
-    new THREE.Plane(new THREE.Vector3(0, 1, 0), corte),
-    new THREE.Plane(new THREE.Vector3(0, 0, 1), corte),
+    new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
+    new THREE.Plane(new THREE.Vector3(0, 1, 0), 0),
+    new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
   ];
 
-  const grupo = new THREE.Group();
-  const meshes = {};
+  // Radios de las capas como fracción del radio de la superficie.
+  const radios = [0, ...CAPAS.map((c) => c.radio * radio)];
 
-  CAPAS.forEach((c) => {
-    const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(radio * c.radio, 96, 64),
-      new THREE.MeshPhongMaterial({
-        color: c.color,
-        side: THREE.DoubleSide,
-        specular: 0x222222,
-        shininess: 12,
-        clippingPlanes: planos,
-        clipIntersection: true,
-      })
-    );
-    mesh.userData.capa = c.id;
-    meshes[c.id] = mesh;
-    grupo.add(mesh);
+  const grupo = new THREE.Group();
+  const porCapa = {}; // id -> [mesh por pared]
+  CAPAS.forEach((c) => (porCapa[c.id] = []));
+
+  const materialPared = (color) =>
+    new THREE.MeshPhongMaterial({
+      color,
+      side: THREE.DoubleSide,
+      emissive: color,
+      emissiveIntensity: 0.25,
+      specular: 0x222222,
+      shininess: 10,
+    });
+
+  // Rotaciones para llevar el shape XY (cuadrante positivo) a cada pared:
+  //   z=0 → identidad (ya es el plano XY, cuadrante x>0,y>0)
+  //   y=0 → rotateX(+90°): (x,y)→(x,z), cuadrante x>0,z>0
+  //   x=0 → rotateY(-90°): (x,y)→(z,y), cuadrante z>0,y>0
+  const rotaciones = [null, (g) => g.rotateX(Math.PI / 2), (g) => g.rotateY(-Math.PI / 2)];
+
+  rotaciones.forEach((rot) => {
+    CAPAS.forEach((c, i) => {
+      const geo = new THREE.ShapeGeometry(sectorAnular(radios[i], radios[i + 1]), 16);
+      if (rot) rot(geo);
+      const mesh = new THREE.Mesh(geo, materialPared(c.color));
+      mesh.userData.capa = c.id;
+      porCapa[c.id].push(mesh);
+      grupo.add(mesh);
+    });
   });
 
   grupo.visible = false;
@@ -58,45 +98,14 @@ export function crearCapasTierra(contenedor, opts = {}) {
 
   return {
     grupo,
-    meshes,
     planos,
+    porCapa,
     CAPAS,
     setVisible(v) {
       grupo.visible = v;
     },
     setCapaVisible(id, v) {
-      if (meshes[id]) meshes[id].visible = v;
-    },
-    // Constante común de los tres planos: mueve la profundidad del corte.
-    setCorte(c) {
-      planos.forEach((p) => (p.constant = c));
+      (porCapa[id] || []).forEach((m) => (m.visible = v));
     },
   };
-}
-
-// Aplica el recorte a un material (superficie, nubes, atmósfera) usando los
-// mismos planos de las capas: la Tierra texturizada se "abre" sin ocultarse.
-// Los ShaderMaterial custom (nubes, atmósfera) no pasan por el pipeline de
-// clipping de three.js: reciben los planos como uniforms y recortan en el
-// fragment shader con el mismo criterio de clipIntersection.
-export function aplicarClipping(material, planos, activa) {
-  if (material.uniforms && material.uniforms.uClipPlanes && material.uniforms.uClipActivo) {
-    if (activa) {
-      planos.forEach((p, i) => {
-        material.uniforms.uClipPlanes.value[i].set(p.normal.x, p.normal.y, p.normal.z, p.constant);
-      });
-      material.uniforms.uClipActivo.value = 1.0;
-    } else {
-      material.uniforms.uClipActivo.value = 0.0;
-    }
-    return;
-  }
-  if (activa) {
-    material.clippingPlanes = planos;
-    material.clipIntersection = true;
-  } else {
-    material.clippingPlanes = null;
-    material.clipIntersection = false;
-  }
-  material.needsUpdate = true;
 }

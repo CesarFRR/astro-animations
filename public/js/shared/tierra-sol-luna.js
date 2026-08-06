@@ -40,11 +40,14 @@ const ATM_FRAGMENT = /* glsl */ `
   varying vec3 vPosW;
   void main() {
     if (uClipActivo > 0.5) {
-      bool fueraDeTodos = true;
+      // Mismo criterio que clipIntersection=true: se descarta solo si el
+      // fragmento está en el lado positivo de TODOS los planos (el octante
+      // del hueco). uClipPlanes[i].w es la constante del plano.
+      bool dentroDeTodos = true;
       for (int i = 0; i < 3; i++) {
-        if (dot(uClipPlanes[i].xyz, vPosW) + uClipPlanes[i].w >= 0.0) fueraDeTodos = false;
+        if (dot(uClipPlanes[i].xyz, vPosW) + uClipPlanes[i].w <= 0.0) dentroDeTodos = false;
       }
-      if (fueraDeTodos) discard;
+      if (dentroDeTodos) discard;
     }
     float fresnel = 1.0 - abs(dot(normalize(vNormalW), normalize(vViewDir)));
     float sunOrient = dot(normalize(vNormalW), normalize(uSunDir));
@@ -80,11 +83,14 @@ const CLOUDS_FRAGMENT = /* glsl */ `
   varying vec2 vUv;
   void main() {
     if (uClipActivo > 0.5) {
-      bool fueraDeTodos = true;
+      // Mismo criterio que clipIntersection=true: se descarta solo si el
+      // fragmento está en el lado positivo de TODOS los planos (el octante
+      // del hueco). uClipPlanes[i].w es la constante del plano.
+      bool dentroDeTodos = true;
       for (int i = 0; i < 3; i++) {
-        if (dot(uClipPlanes[i].xyz, vPosW) + uClipPlanes[i].w >= 0.0) fueraDeTodos = false;
+        if (dot(uClipPlanes[i].xyz, vPosW) + uClipPlanes[i].w <= 0.0) dentroDeTodos = false;
       }
-      if (fueraDeTodos) discard;
+      if (dentroDeTodos) discard;
     }
     vec3 n = normalize(vNormalW);
     float sunOrient = dot(n, normalize(uSunDir));
@@ -355,6 +361,13 @@ export function crearTierraSola(scene, opts = {}) {
     metalness: 0,
     color: new THREE.Color(1, 1, 1),
   });
+  // Uniforms del recorte manual de la tajada (MeshStandardMaterial no admite
+  // "uniforms" en el constructor; se exponen como propiedad propia y se
+  // registran en onBeforeCompile).
+  material.uniforms = {
+    uClipPlanes: { value: [new THREE.Vector4(), new THREE.Vector4(), new THREE.Vector4()] },
+    uClipActivo: { value: 0.0 },
+  };
 
   material.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader.replace(
@@ -373,9 +386,27 @@ uniform vec3 uAtmDay;
 uniform vec3 uAtmTwilight;
 uniform float uModo;
 uniform float uAtmActivo;
+uniform vec4 uClipPlanes[3];
+uniform float uClipActivo;
 varying vec3 vNormalW;
 varying vec3 vPosW;
 ` + shader.fragmentShader;
+
+    // Recorte manual de la tajada (mismo criterio que clipIntersection=true):
+    // se descarta el octante del hueco (x>0,y>0,z>0 en el espacio local).
+    // No se usa clippingPlanes nativo porque el shader tiene customProgramCacheKey
+    // fijo y no recompila los chunks de clipping.
+    shader.fragmentShader = shader.fragmentShader.replace(
+      'void main() {',
+      `void main() {
+    if (uClipActivo > 0.5) {
+      bool dentroDeTodos = true;
+      for (int i = 0; i < 3; i++) {
+        if (dot(uClipPlanes[i].xyz, vPosW) + uClipPlanes[i].w <= 0.0) dentroDeTodos = false;
+      }
+      if (dentroDeTodos) discard;
+    }`
+    );
 
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <map_fragment>',
@@ -416,6 +447,8 @@ varying vec3 vPosW;
     );
 
     Object.assign(shader.uniforms, uniformsRef);
+    shader.uniforms.uClipPlanes = material.uniforms.uClipPlanes;
+    shader.uniforms.uClipActivo = material.uniforms.uClipActivo;
   };
   material.customProgramCacheKey = () => 'earth-pbr';
 
