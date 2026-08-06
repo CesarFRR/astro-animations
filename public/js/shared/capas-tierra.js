@@ -15,8 +15,7 @@ const CAPAS = [
   { id: "corteza", nombre: "Corteza", radio: 1.0, color: 0x3f9d78 },
 ];
 
-export function crearCapasTierra(contenedor, opts = {}) {
-  const { radio = 1.2 } = opts;
+export function crearCapasTierra(contenedor, opts = {}) {  const { radio = 1.2 } = opts;
 
   // Tres planos ortogonales: la sección visible queda dentro de todos
   // (clipIntersection), como el octante del ejemplo oficial de three.js.
@@ -65,4 +64,17 @@ export function crearCapasTierra(contenedor, opts = {}) {
       planos.forEach((p) => (p.constant = c));
     },
   };
+}
+
+// Aplica el recorte a un material exterior (superficie, nubes) usando los
+// mismos planos de las capas: la Tierra texturizada se "abre" sin ocultarse.
+export function aplicarClipping(material, planos, activa) {
+  if (activa) {
+    material.clippingPlanes = planos;
+    material.clipIntersection = true;
+  } else {
+    material.clippingPlanes = null;
+    material.clipIntersection = false;
+  }
+  material.needsUpdate = true;
 }

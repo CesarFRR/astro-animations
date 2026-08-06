@@ -4,7 +4,7 @@ import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/star
 import { crearTierraSola, updateTierraSola } from "/astro-animations/js/shared/tierra-sol-luna.js";
 import { crearNavegacionTeclado } from "/astro-animations/js/shared/navegacion.js";
 import { crearLODTierra } from "/astro-animations/js/shared/lod-texturas.js";
-import { crearCapasTierra } from "/astro-animations/js/shared/capas-tierra.js";
+import { crearCapasTierra, aplicarClipping } from "/astro-animations/js/shared/capas-tierra.js";
 import { initPanelOpciones } from "/astro-animations/js/shared/panel-opciones.js";
 
 // ===== Explorador de la Tierra reutilizable =====
@@ -75,12 +75,14 @@ export function iniciarExploradorTierra(opts = {}) {
 
   function mostrarCapas(activa) {
     if (activa) {
-      tierra.mesh.visible = false;
+      // La superficie texturizada se corta con los mismos planos: se ve la
+      // Tierra con mares y continentes "abierta", y las capas por dentro.
+      aplicarClipping(tierra.mesh.material, capas.planos, true);
       tierra.nubes1.visible = false;
       if (tierra.atmosfera) tierra.atmosfera.visible = false;
       capas.setVisible(true);
     } else {
-      tierra.mesh.visible = true;
+      aplicarClipping(tierra.mesh.material, capas.planos, false);
       tierra.nubes1.visible = optNubes ? optNubes.checked : true;
       if (tierra.atmosfera) {
         const activa = optAtmosfera ? optAtmosfera.checked : true;
