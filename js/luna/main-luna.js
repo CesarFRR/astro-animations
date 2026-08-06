@@ -75,6 +75,7 @@ const extras = crearExtrasLuna(scene, luna.luna, {
   radio: 0.6,
   domElement: renderer.domElement,
   onSelect: volarAZona,
+  onCerrar: cerrarPanelEtiqueta,
 });
 extras.cargarDatos();
 
@@ -91,7 +92,7 @@ optNombres?.addEventListener("change", (e) => {
 });
 
 // ===== Fly-to: detener rotación y acercar la cámara a una zona =====
-const fly = { activo: false, destino: new THREE.Vector3() };
+const fly = { activo: false, destino: new THREE.Vector3(), tiempo: 0 };
 const tmpFly = new THREE.Vector3();
 
 function volarAZona(it) {
@@ -100,6 +101,16 @@ function volarAZona(it) {
   tmpFly.copy(it.dir).applyQuaternion(luna.luna.quaternion).normalize();
   fly.destino.copy(tmpFly).multiplyScalar(0.8);
   fly.activo = true;
+  fly.tiempo = 0;
+}
+
+// Cerrar el panel de la etiqueta: reanuda la rotación y cancela el vuelo.
+function cerrarPanelEtiqueta() {
+  fly.activo = false;
+  if (!playing) {
+    playing = true;
+    playBtn.textContent = "⏸";
+  }
 }
 
 initPanelOpciones();
@@ -114,7 +125,8 @@ function animate() {
   if (fly.activo) {
     const k = 1 - Math.pow(0.0005, dt);
     camera.position.lerp(fly.destino, k);
-    if (camera.position.distanceTo(fly.destino) < 0.002) {
+    fly.tiempo += dt;
+    if (camera.position.distanceTo(fly.destino) < 0.002 || fly.tiempo > 2.5) {
       camera.position.copy(fly.destino);
       fly.activo = false;
     }
