@@ -1,8 +1,8 @@
 import * as THREE from "three";
-
-// ===== Capas internas de la Tierra (técnica clipIntersection de three.js) =====
-// Esferas concéntricas recortadas por planos de clipping: solo se dibuja la
-// porción dentro de todos los planos, revelando la sección interior.
+// ===== Capas internas de la Tierra (recorte por plano de corte) =====
+// La superficie texturizada y las esferas concéntricas se recortan con el
+// MISMO plano de clipping: la Tierra con mares y continentes se "parte por
+// la mitad" y las capas internas quedan visibles por dentro del corte.
 // Radios reales (fracción del radio terrestre 6371 km):
 //   núcleo interno 1221 km (0.19), núcleo externo 3480 km (0.55),
 //   manto 6340 km (0.995), corteza 6371 km (1.0). La corteza se exagera
@@ -11,19 +11,17 @@ import * as THREE from "three";
 const CAPAS = [
   { id: "nucleo-interno", nombre: "Núcleo interno", radio: 0.19, color: 0xffd777 },
   { id: "nucleo-externo", nombre: "Núcleo externo", radio: 0.55, color: 0xe8943a },
-  { id: "manto", nombre: "Manto", radio: 0.93, color: 0x9a5a35 },
-  { id: "corteza", nombre: "Corteza", radio: 1.0, color: 0x3f9d78 },
+  { id: "manto", nombre: "Manto", radio: 0.95, color: 0x9a5a35 },
+  { id: "corteza", nombre: "Corteza", radio: 0.995, color: 0x3f9d78 },
 ];
 
-export function crearCapasTierra(contenedor, opts = {}) {  const { radio = 1.2 } = opts;
+export function crearCapasTierra(contenedor, opts = {}) {
+  const { radio = 1.2, normal = new THREE.Vector3(1, 0, 0), corte = 0 } = opts;
 
-  // Tres planos ortogonales: la sección visible queda dentro de todos
-  // (clipIntersection), como el octante del ejemplo oficial de three.js.
-  const planos = [
-    new THREE.Plane(new THREE.Vector3(1, 0, 0), 0),
-    new THREE.Plane(new THREE.Vector3(0, -1, 0), 0),
-    new THREE.Plane(new THREE.Vector3(0, 0, -1), 0),
-  ];
+  // Un solo plano de corte (sagital). Con clipIntersection se conserva la
+  // porción de la esfera que está "detrás" del plano; el resto desaparece y
+  // deja ver el interior. El plano se aplica a superficie y capas por igual.
+  const planos = [new THREE.Plane(normal.clone().normalize(), corte)];
 
   const grupo = new THREE.Group();
   const meshes = {};
