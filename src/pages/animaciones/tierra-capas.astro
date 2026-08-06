@@ -2,27 +2,26 @@
 import ExplorerLayout from '../../layouts/ExplorerLayout.astro';
 ---
 <ExplorerLayout
-  title="La Tierra"
+  title="Tierra — Capas Internas"
   subtitle="Arrastra para orbitar · Botón derecho / WASD para moverte · Rueda para zoom"
-  scriptSrc="js/tierra/main-tierra.js"
+  scriptSrc="js/tierra/main-capas.js"
 >
   <div slot="controls" class="panel-opciones">
     <details class="opciones">
       <summary>⚙ Opciones</summary>
       <div class="opciones-cuerpo">
         <div class="opciones-toggles">
-          <label class="chk"><input type="checkbox" id="opt-nubes" checked> Nubes</label>
-          <label class="chk"><input type="checkbox" id="opt-atmosfera" checked> Atmósfera</label>
-          <label class="chk"><input type="checkbox" id="opt-relieve" checked> Relieve</label>
-          <label class="chk"><input type="checkbox" id="opt-capas"> Ver capas internas</label>
+          <label class="chk"><input type="checkbox" id="opt-capas" checked> Ver capas internas</label>
         </div>
         <div class="opciones-fila">
-          <span class="opciones-etiqueta">Ilumin.</span>
-          <div class="seg" id="opt-iluminacion">
-            <button type="button" data-modo="0" class="active">Día/Noche</button>
-            <button type="button" data-modo="1">Día</button>
-            <button type="button" data-modo="2">Noche</button>
-          </div>
+          <span class="opciones-etiqueta">Corte</span>
+          <input type="range" id="opt-corte" min="-0.8" max="1.2" step="0.01" value="0.0" class="opciones-range" />
+        </div>
+        <div class="opciones-toggles">
+          <label class="chk"><input type="checkbox" id="opt-capa-nucleo-interno" checked> Núcleo interno</label>
+          <label class="chk"><input type="checkbox" id="opt-capa-nucleo-externo" checked> Núcleo externo</label>
+          <label class="chk"><input type="checkbox" id="opt-capa-manto" checked> Manto</label>
+          <label class="chk"><input type="checkbox" id="opt-capa-corteza" checked> Corteza</label>
         </div>
         <div class="opciones-fila">
           <span class="opciones-etiqueta">Calidad</span>

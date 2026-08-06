@@ -71,6 +71,16 @@ export const animations: Animation[] = [
     duration: '∞'
   },
   {
+    id: 'tierra-capas',
+    title: 'Tierra — Capas Internas',
+    description: 'Secciona la Tierra con un plano de corte (clipping por intersección) para revelar el núcleo interno, el núcleo externo, el manto y la corteza. Mueve el corte y activa cada capa a tu ritmo.',
+    category: 'sistema-solar',
+    tags: ['Núcleo interno', 'Manto', 'Corteza', 'Clipping'],
+    thumbnail: '/thumbnails/tierra-capas.jpg',
+    difficulty: 'basico',
+    duration: '∞'
+  },
+  {
     id: 'sol-estudio',
     title: 'Sol — La Estrella Madre',
     description: 'El Sol a solas con su corona: la fotosfera gira en ~25 días y el halo surge del bloom. Ideal para presentar la estrella de nuestro sistema.',
