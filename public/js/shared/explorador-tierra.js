@@ -4,7 +4,7 @@ import { createStarfield, updateTwinkle } from "/astro-animations/js/shared/star
 import { crearTierraSola, updateTierraSola } from "/astro-animations/js/shared/tierra-sol-luna.js";
 import { crearNavegacionTeclado } from "/astro-animations/js/shared/navegacion.js";
 import { crearLODTierra } from "/astro-animations/js/shared/lod-texturas.js";
-import { crearCapasTierra, aplicarClipping } from "/astro-animations/js/shared/capas-tierra.js";
+import { crearCapasTierra } from "/astro-animations/js/shared/capas-tierra.js";
 import { initPanelOpciones } from "/astro-animations/js/shared/panel-opciones.js";
 
 // ===== Explorador de la Tierra reutilizable =====
@@ -72,17 +72,77 @@ export function iniciarExploradorTierra(opts = {}) {
   // Capas internas: siempre se crean; el toggle decide si se muestran.
   renderer.localClippingEnabled = true;
   const capas = crearCapasTierra(tierra.tierraSpin, { radio: tierra.radio });
+  let capasActivo = false;
+
+  // Planos de recorte en ESPACIO DEL MUNDO. three.js aplica los
+  // clippingPlanes de cada material como planos del mundo; para que la tajada
+  // gire siempre con la Tierra (que rota sobre tierraSpin), estos planos se
+  // derivan de los planos locales de las capas y se transforman por la matriz
+  // del mundo de tierraSpin. Usamos los MISMOS objetos THREE.Plane para todos
+  // los materiales (built-in y ShaderMaterial con uClipPlanes).
+  const planos = capas.planos;
+  const planosMundo = planos.map(() => new THREE.Plane());
+  const tmpPlane = new THREE.Plane();
+
+  // Refresca planosMundo con la orientación actual del spin y sube los valores
+  // a los ShaderMaterial custom (vPosW en el fragment está en el mundo).
+  function sincronizarPlanosMundo() {
+    tierra.tierraSpin.updateMatrixWorld(true);
+    const mundo = tierra.tierraSpin.matrixWorld;
+    planos.forEach((p, i) => {
+      tmpPlane.copy(p).applyMatrix4(mundo);
+      planosMundo[i].copy(tmpPlane);
+    });
+    [
+      { material: tierra.nubes1?.material },
+      { material: tierra.atmosfera?.material },
+    ].forEach(({ material }) => {
+      if (!material || !material.uniforms || !material.uniforms.uClipPlanes) return;
+      planosMundo.forEach((p, i) => {
+        material.uniforms.uClipPlanes.value[i].set(p.normal.x, p.normal.y, p.normal.z, p.constant);
+      });
+    });
+  }
+
+  // (Des)activa el recorte en un material con los planos de mundo actuales.
+  function aplicarClipMaterial(material, activa) {
+    if (material.uniforms && material.uniforms.uClipPlanes && material.uniforms.uClipActivo) {
+      material.uniforms.uClipActivo.value = activa ? 1.0 : 0.0;
+      if (activa) {
+        planosMundo.forEach((p, i) => {
+          material.uniforms.uClipPlanes.value[i].set(p.normal.x, p.normal.y, p.normal.z, p.constant);
+        });
+      }
+      return;
+    }
+    if (activa) {
+      material.clippingPlanes = planosMundo;
+      material.clipIntersection = true;
+    } else {
+      material.clippingPlanes = [];
+      material.clipIntersection = false;
+    }
+  }
 
   function mostrarCapas(activa) {
+    capasActivo = activa;
     if (activa) {
-      // La superficie texturizada se corta con los mismos planos: se ve la
-      // Tierra con mares y continentes "abierta", y las capas por dentro.
-      aplicarClipping(tierra.mesh.material, capas.planos, true);
-      tierra.nubes1.visible = false;
-      if (tierra.atmosfera) tierra.atmosfera.visible = false;
+      // La superficie texturizada, las capas internas, las nubes y la
+      // atmósfera se recortan con los mismos planos de mundo: se ve la Tierra
+      // con mares y continentes "abierta", con las capas por dentro de la
+      // tajada.
+      sincronizarPlanosMundo();
+      aplicarClipMaterial(tierra.mesh.material, true);
+      Object.values(capas.meshes).forEach((m) => aplicarClipMaterial(m.material, true));
+      aplicarClipMaterial(tierra.nubes1.material, true);
+      if (tierra.atmosfera) aplicarClipMaterial(tierra.atmosfera.material, true);
+      if (tierra.nubes1 && optNubes) tierra.nubes1.visible = optNubes.checked;
       capas.setVisible(true);
     } else {
-      aplicarClipping(tierra.mesh.material, capas.planos, false);
+      aplicarClipMaterial(tierra.mesh.material, false);
+      Object.values(capas.meshes).forEach((m) => aplicarClipMaterial(m.material, false));
+      aplicarClipMaterial(tierra.nubes1.material, false);
+      if (tierra.atmosfera) aplicarClipMaterial(tierra.atmosfera.material, false);
       tierra.nubes1.visible = optNubes ? optNubes.checked : true;
       if (tierra.atmosfera) {
         const activa = optAtmosfera ? optAtmosfera.checked : true;
@@ -91,6 +151,11 @@ export function iniciarExploradorTierra(opts = {}) {
       }
       capas.setVisible(false);
     }
+  }
+
+  function setCorteValor(c) {
+    capas.setCorte(c);
+    if (capasActivo) sincronizarPlanosMundo();
   }
 
   let playing = true;
@@ -167,6 +232,7 @@ export function iniciarExploradorTierra(opts = {}) {
     if (playing && rotar) {
       updateTierraSola(tierra.sim, tierra, dt * speed);
     }
+    if (capasActivo) sincronizarPlanosMundo();
     navegar(dt);
     const dist = camera.position.distanceTo(controls.target);
 
@@ -186,5 +252,5 @@ export function iniciarExploradorTierra(opts = {}) {
   }
   animate();
 
-  return { renderer, scene, camera, controls, tierra, capas, mostrarCapas, lodTierra };
+  return { renderer, scene, camera, controls, tierra, capas, mostrarCapas, setCorteValor, lodTierra };
 }
