@@ -594,6 +594,14 @@ html, body {
   min-width: 3.2rem;
 }
 
+.opciones-range {
+  flex: 1 1 160px;
+  min-width: 160px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  height: 1.4rem;
+}
+
 .seg {
   display: inline-flex;
   flex-wrap: wrap;
