@@ -42,87 +42,6 @@ const ATM_FRAGMENT = /* glsl */ `
     gl_FragColor = vec4(atmosColor, alpha);
   }
 `;
-
-const TIERRA_VERTEX = /* glsl */ `
-  varying vec3 vNormalW;
-  varying vec3 vPosW;
-  varying vec2 vUv;
-  void main() {
-    vec4 wp = modelMatrix * vec4(position, 1.0);
-    vNormalW = normalize(mat3(modelMatrix) * normal);
-    vPosW = wp.xyz;
-    vUv = uv;
-    gl_Position = projectionMatrix * viewMatrix * wp;
-  }
-`;
-
-const TIERRA_FRAGMENT = /* glsl */ `
-  uniform sampler2D uDay;
-  uniform sampler2D uNight;
-  uniform sampler2D uDetail;
-  uniform vec3 uSunDir;
-  uniform vec3 uAtmDay;
-  uniform vec3 uAtmTwilight;
-  uniform float uModo;
-  varying vec3 vNormalW;
-  varying vec3 vPosW;
-  varying vec2 vUv;
-
-  const float PI_ = 3.14159265359;
-
-  void main() {
-    vec3 normal = normalize(vNormalW);
-    vec3 viewDir = normalize(cameraPosition - vPosW);
-    vec3 sunDir = normalize(uSunDir);
-
-    float sunOrient = dot(normal, sunDir);
-    float fresnel = 1.0 - abs(dot(normal, viewDir));
-
-    vec3 day = texture(uDay, vUv).rgb;
-    vec3 night = texture(uNight, vUv).rgb;
-    vec3 detail = texture(uDetail, vUv).rgb;
-
-    float h = detail.r;
-    float hx = texture(uDetail, vUv + vec2(0.002, 0.0)).r;
-    float hy = texture(uDetail, vUv + vec2(0.0, 0.002)).r;
-    vec3 n = normalize(normal + vec3(hx - h, hy - h, 0.0) * 2.0);
-
-    float NdotL = max(dot(n, sunDir), 0.0);
-    float ndl = mix(NdotL, 1.0, step(0.5, uModo));
-    float NdotV = max(dot(n, viewDir), 0.0);
-    vec3 diffuse = day * (0.10 + 1.0 * ndl);
-
-    float rough = 0.25 + 0.10 * clamp(detail.g, 0.0, 1.0);
-    float a = rough * rough;
-    float a2 = a * a;
-    vec3 H = normalize(sunDir + viewDir);
-    float NdotH = max(dot(n, H), 0.0);
-    float VdotH = max(dot(viewDir, H), 0.0);
-    float denom = NdotH * NdotH * (a2 - 1.0) + 1.0;
-    float D = a2 / max(PI_ * denom * denom, 1e-6);
-    float k = (a + 1.0) * (a + 1.0) / 8.0;
-    float Gv = NdotV / max(NdotV * (1.0 - k) + k, 1e-6);
-    float Gl = ndl / max(ndl * (1.0 - k) + k, 1e-6);
-    vec3 F0 = vec3(0.04);
-    vec3 F = F0 + (vec3(1.0) - F0) * pow(1.0 - VdotH, 5.0);
-    vec3 spec = D * Gv * Gl * F / max(4.0 * NdotV * ndl, 1e-4);
-    float specGate = 1.0 - step(0.5, uModo);
-    vec3 lit = diffuse + spec * 0.9 * specGate;
-
-    float ds = smoothstep(-0.25, 0.5, sunOrient);
-    ds = mix(ds, 1.0, step(0.5, uModo));
-    ds = mix(ds, 0.0, step(1.5, uModo));
-    vec3 color = mix(night, lit, ds);
-
-    vec3 atmo = mix(uAtmTwilight, uAtmDay, smoothstep(-0.25, 0.75, sunOrient));
-    float atmoMix = clamp(smoothstep(-0.5, 1.0, sunOrient) * fresnel * fresnel, 0.0, 1.0) * 0.6;
-    atmoMix *= 1.0 - step(1.5, uModo);
-    color = mix(color, atmo, atmoMix);
-
-    gl_FragColor = vec4(color, 1.0);
-  }
-`;
-
 const CLOUDS_VERTEX = /* glsl */ `
   varying vec3 vNormalW;
   varying vec2 vUv;
@@ -135,6 +54,8 @@ const CLOUDS_VERTEX = /* glsl */ `
 
 const CLOUDS_FRAGMENT = /* glsl */ `
   uniform sampler2D uClouds;
+  uniform sampler2D uCloudsPrev;
+  uniform float uCloudBlend;
   uniform vec3 uSunDir;
   uniform float uModo;
   varying vec3 vNormalW;
@@ -143,8 +64,10 @@ const CLOUDS_FRAGMENT = /* glsl */ `
     vec3 n = normalize(vNormalW);
     float sunOrient = dot(n, normalize(uSunDir));
     float day = mix(smoothstep(-0.15, 0.35, sunOrient), 1.0, step(0.5, uModo));
-    float c = texture(uClouds, vUv).r;
-    gl_FragColor = vec4(vec3(1.0) * c * day, c * day * 0.85);
+    float cNew = texture(uClouds, vUv).r;
+    float cPrev = texture(uCloudsPrev, vUv).r;
+    float c = mix(cPrev, cNew, uCloudBlend);
+    gl_FragColor = vec4(vec3(1.0) * c * day, c * 0.85);
   }
 `;
 
@@ -369,6 +292,8 @@ export function crearTierraSola(scene, opts = {}) {
     noche: loader.load(`${BASE}/textures/max/2k_earth_nightmap.webp`),
     detalle: loader.load(`${BASE}/textures/max/2k_earth_bump_roughness_clouds.webp`),
     nubes: loader.load(`${BASE}/textures/max/2k_earth_clouds.webp`),
+    normal: loader.load(`${BASE}/textures/max/earth_normal_2048.jpg`),
+    specular: loader.load(`${BASE}/textures/max/8k_earth_specular_map.webp`),
   };
   tex.dia.colorSpace = THREE.SRGBColorSpace;
   tex.dia.anisotropy = 8;
@@ -376,6 +301,8 @@ export function crearTierraSola(scene, opts = {}) {
   tex.noche.anisotropy = 8;
   tex.detalle.anisotropy = 8;
   tex.nubes.anisotropy = 8;
+  tex.normal.anisotropy = 8;
+  tex.specular.anisotropy = 8;
 
   const tierra = new THREE.Group();
   const tierraTilt = new THREE.Group();
@@ -385,19 +312,19 @@ export function crearTierraSola(scene, opts = {}) {
 
   const uniformsRef = {
     uNight: { value: tex.noche },
-    uDetail: { value: tex.detalle },
     uSunDir: { value: sunDir.clone().normalize() },
     uAtmDay: { value: ATM_DIA.clone() },
     uAtmTwilight: { value: ATM_CREPUSCULO.clone() },
     uModo: { value: 0 },
+    uAtmActivo: { value: atmosfera ? 1.0 : 0.0 },
   };
 
   const material = new THREE.MeshStandardMaterial({
     map: tex.dia,
     roughness: 1.0,
-    roughnessMap: tex.detalle,
-    bumpMap: tex.detalle,
-    bumpScale: 0.015,
+    roughnessMap: tex.specular,
+    normalMap: tex.normal,
+    normalScale: new THREE.Vector2(0.6, 0.6),
     metalness: 0,
     color: new THREE.Color(1, 1, 1),
   });
@@ -414,11 +341,11 @@ vPosW = (modelMatrix * vec4(transformed, 1.0)).xyz;
 
     shader.fragmentShader =
       `uniform sampler2D uNight;
-uniform sampler2D uDetail;
 uniform vec3 uSunDir;
 uniform vec3 uAtmDay;
 uniform vec3 uAtmTwilight;
 uniform float uModo;
+uniform float uAtmActivo;
 varying vec3 vNormalW;
 varying vec3 vPosW;
 ` + shader.fragmentShader;
@@ -433,14 +360,19 @@ varying vec3 vPosW;
       `float roughnessFactor = roughness;
 #ifdef USE_ROUGHNESSMAP
 	vec4 texelRoughness = texture2D( roughnessMap, vRoughnessMapUv );
-	roughnessFactor = 0.25 + 0.10 * texelRoughness.g;
+	roughnessFactor = 0.30 + 0.50 * (1.0 - texelRoughness.g);
 #endif`
     );
 
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <opaque_fragment>',
       `{
-  if (uModo >= 0.5 && uModo < 1.5) outgoingLight = diffuseColor.rgb * 0.85;
+  vec3 n = normalize(normal);
+  vec3 L = normalize(uSunDir);
+  if (uModo >= 0.5 && uModo < 1.5) {
+    float ndl = abs(dot(n, L)) * 0.75 + 0.25;
+    outgoingLight = diffuseColor.rgb * ndl;
+  }
   vec3 nightColor = texture2D(uNight, vMapUv).rgb;
   float sunOrient = dot(normalize(vNormalW), normalize(uSunDir));
   float ds = smoothstep(-0.25, 0.5, sunOrient);
@@ -450,7 +382,7 @@ varying vec3 vPosW;
   float fresnel = 1.0 - abs(dot(normalize(vNormalW), normalize(cameraPosition - vPosW)));
   vec3 atmo = mix(uAtmTwilight, uAtmDay, smoothstep(-0.25, 0.75, sunOrient));
   float atmoMix = clamp(smoothstep(-0.5, 1.0, sunOrient) * fresnel * fresnel, 0.0, 1.0) * 0.6;
-  atmoMix *= 1.0 - step(1.5, uModo);
+  atmoMix *= uAtmActivo * (1.0 - step(1.5, uModo));
   outgoingLight = mix(outgoingLight, atmo, atmoMix);
   #include <opaque_fragment>
   }`
@@ -469,6 +401,8 @@ varying vec3 vPosW;
     depthWrite: false,
     uniforms: {
       uClouds: { value: tex.nubes },
+      uCloudsPrev: { value: tex.nubes },
+      uCloudBlend: { value: 0.0 },
       uSunDir: { value: uniformsRef.uSunDir.value.clone() },
       uModo: uniformsRef.uModo,
     },
@@ -527,10 +461,17 @@ export function crearLunaSola(scene, opts = {}) {
   const tex = { luna: loader.load(`${BASE}/textures/normal/moon.webp`) };
   tex.luna.colorSpace = THREE.SRGBColorSpace;
   tex.luna.anisotropy = 8;
+  const texLunaNormal = loader.load(`${BASE}/textures/max/luna_normal_4096.webp`);
+  texLunaNormal.anisotropy = 8;
 
   const luna = new THREE.Mesh(
     new THREE.SphereGeometry(radio, 64, 48),
-    new THREE.MeshPhongMaterial({ map: tex.luna, shininess: 4 })
+    new THREE.MeshPhongMaterial({
+      map: tex.luna,
+      normalMap: texLunaNormal,
+      normalScale: new THREE.Vector2(0.5, 0.5),
+      shininess: 4,
+    })
   );
   scene.add(luna);
 
@@ -545,7 +486,7 @@ export function crearLunaSola(scene, opts = {}) {
   scene.add(new THREE.AmbientLight(0xffffff, 0.2));
 
   const sim = { dias: 0 };
-  return { luna, luz, fill, sim, tex, manager, radio };
+  return { luna, luz, fill, sim, tex, normalMap: texLunaNormal, manager, radio };
 }
 
 export function updateLunaSola(sim, refs, dt) {

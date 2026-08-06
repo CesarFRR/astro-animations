@@ -26,3 +26,6 @@ graphify-out/
 
 
 ejemplos-proyectos-comunidad/
+
+# Artefactos intermedios de texturas (solo se usa el webp en runtime)
+public/textures/max/*_4096.png

@@ -541,11 +541,12 @@ html, body {
   position: fixed;
   bottom: 5.5rem;
   left: 1.5rem;
+  z-index: 100;
+  opacity: 0;
   width: 320px;
   max-width: min(320px, calc(100vw - 2rem));
   max-height: calc(100vh - 6rem);
   overflow-y: auto;
-  background: rgba(10, 16, 28, 0.96);
   background: rgba(10, 16, 28, 0.96);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
@@ -559,7 +560,8 @@ html, body {
 
 .opciones-toggles {
   display: flex;
-  gap: 1.1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
 }
 
 .chk {
@@ -581,6 +583,7 @@ html, body {
 
 .opciones-fila {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.7rem;
 }
@@ -593,6 +596,7 @@ html, body {
 
 .seg {
   display: inline-flex;
+  flex-wrap: wrap;
   background: #0d1522;
   border: 1px solid var(--panel-border);
   border-radius: 8px;
@@ -608,6 +612,21 @@ html, body {
   cursor: pointer;
   transition: all 0.12s;
   white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .seg {
+    width: 100%;
+  }
+
+  .seg button {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .opciones-fila {
+    align-items: flex-start;
+  }
 }
 
 .seg button:hover {

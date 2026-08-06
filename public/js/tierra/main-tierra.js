@@ -18,16 +18,18 @@ controls.minDistance = 1.5;
 controls.maxDistance = 80;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 1.1;
+controls.minPolarAngle = 0.05;
+controls.maxPolarAngle = Math.PI - 0.05;
 
 const sf = createStarfield(scene, 4000, 60, 500);
 
-const tierra = crearTierraSola(scene, {});
+const tierra = crearTierraSola(scene, { sunDir: new THREE.Vector3(1.3, 0.45, 0.9).normalize() });
 const navegar = crearNavegacionTeclado(camera, controls);
 const lodTierra = crearLODTierra(
   [
     { material: tierra.mesh.material, prop: "map" },
     { set: (t) => { tierra.uniforms.uNight.value = t; } },
-    { material: tierra.nubes1.material, uniform: "uClouds" },
+    { material: tierra.nubes1.material, uniform: "uClouds", uniformPrev: "uCloudsPrev", uniformBlend: "uCloudBlend", linear: true },
   ],
   [
     { max: null, texs: [tierra.tex.dia, tierra.tex.noche, tierra.tex.nubes] },
@@ -41,7 +43,7 @@ const lodTierra = crearLODTierra(
       srgb: true,
     },
     {
-      max: 2.4,
+      max: 3.0,
       urls: [
         "/astro-animations/textures/max/8k_earth_daymap.webp",
         "/astro-animations/textures/max/8k_earth_nightmap.webp",
@@ -71,11 +73,14 @@ function setSeg(botones, clave, valor) {
 }
 
 function actualizarAtmosfera() {
-  if (tierra.atmosfera) tierra.atmosfera.visible = optAtmosfera.checked && (tierra.uniforms.uModo.value !== 2);
+  const activa = optAtmosfera.checked && (tierra.uniforms.uModo.value !== 2);
+  if (tierra.atmosfera) tierra.atmosfera.visible = activa;
+  if (tierra.uniforms.uAtmActivo) tierra.uniforms.uAtmActivo.value = activa ? 1.0 : 0.0;
 }
 
 const optNubes = document.getElementById("opt-nubes");
 const optAtmosfera = document.getElementById("opt-atmosfera");
+const optRelieve = document.getElementById("opt-relieve");
 const segIlum = document.querySelectorAll("#opt-iluminacion button");
 const segCalidad = document.querySelectorAll("#opt-calidad button");
 
@@ -83,6 +88,10 @@ optNubes?.addEventListener("change", (e) => {
   tierra.nubes1.visible = e.target.checked;
 });
 optAtmosfera?.addEventListener("change", actualizarAtmosfera);
+optRelieve?.addEventListener("change", (e) => {
+  tierra.mesh.material.normalMap = e.target.checked ? tierra.tex.normal : null;
+  tierra.mesh.material.needsUpdate = true;
+});
 segIlum.forEach((b) => {
   b.addEventListener("click", () => {
     const modo = Number(b.dataset.modo);
@@ -113,6 +122,15 @@ function animate() {
   }
   navegar(dt);
   const dist = camera.position.distanceTo(controls.target);
+
+  // Adjust rotation speed based on distance
+  const rotPrecision = THREE.MathUtils.smoothstep(dist, 1.6, 6.0);
+  controls.rotateSpeed = THREE.MathUtils.lerp(0.1, 1.0, rotPrecision);
+
+  const reliefZoom = 1 - THREE.MathUtils.smoothstep(dist, 1.6, 3.0);
+  const normalScale = THREE.MathUtils.lerp(0.1, 1.5, reliefZoom);
+  tierra.mesh.material.normalScale.set(normalScale, normalScale);
+
   lodTierra.actualizarLOD(dt, dist);
   updateTwinkle(sf, clock.elapsedTime);
   controls.update();
