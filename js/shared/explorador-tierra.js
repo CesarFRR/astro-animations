@@ -84,22 +84,36 @@ export function iniciarExploradorTierra(opts = {}) {
   const planosMundo = planos.map(() => new THREE.Plane());
   const tmpQuat = new THREE.Quaternion();
   const tmpVec = new THREE.Vector3();
-  const dirHueco = new THREE.Vector3(1, 1, 1).normalize();
+  // Proyección del hueco local (1,1,1)/√3 sobre el plano horizontal: al girar
+  // solo en azimut (alrededor de +Y) el borde vertical de la tajada queda
+  // siempre apuntando hacia arriba (polo de la esfera) aunque se orbite o
+  // haga pan.
+  const dirHuecoXZ = new THREE.Vector3(1, 0, 1).normalize();
 
-  // Dirección objetivo de la tajada: hacia la cámara por defecto; si estamos
-  // en modo "solo día" (uModo=1), hacia el sol para que el corte quede en la
-  // parte iluminada.
+  // Dirección objetivo de la tajada: hacia donde mira la cámara por defecto;
+  // si estamos en modo "solo día" (uModo=1), hacia el sol (parte iluminada).
+  // Se usa camera.position - controls.target en vez de camera.position para
+  // que el pan (click derecho + arrastre) NO mueva la tajada.
   function direccionTajada() {
     const modo = tierra.uniforms.uModo.value;
-    if (modo === 1) return tierra.uniforms.uSunDir.value.clone().normalize();
-    return tmpVec.copy(camera.position).normalize();
+    if (modo === 1) return tierra.uniforms.uSunDir.value.clone();
+    return tmpVec.copy(camera.position).sub(controls.target).normalize();
   }
 
   // Refresca planosMundo según la dirección actual de la cámara/sol, orienta
   // el grupo de paredes con el mismo quaternion y sube los valores a los
   // ShaderMaterial custom (vPosW en el fragment está en el mundo).
   function sincronizarPlanosMundo() {
-    tmpQuat.setFromUnitVectors(dirHueco, direccionTajada());
+    const dir = direccionTajada();
+    // Rotación solo en azimut: proyecta la dirección sobre el plano XZ y
+    // alinea ahí la proyección del hueco. El borde vertical queda fijo en +Y.
+    tmpVec.set(dir.x, 0, dir.z);
+    if (tmpVec.lengthSq() > 1e-6) {
+      tmpVec.normalize();
+      tmpQuat.setFromUnitVectors(dirHuecoXZ, tmpVec);
+    } else {
+      tmpQuat.identity();
+    }
     capas.grupo.quaternion.copy(tmpQuat);
     planos.forEach((p, i) => {
       planosMundo[i].copy(p);
