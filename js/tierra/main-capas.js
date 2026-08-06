@@ -11,7 +11,7 @@ const explorador = iniciarExploradorTierra({
 // Profundidad del corte (constante común de los tres planos de clipping).
 const optCorte = document.getElementById("opt-corte");
 optCorte?.addEventListener("input", (e) => {
-  explorador.capas.setCorte(parseFloat(e.target.value));
+  explorador.setCorteValor(parseFloat(e.target.value));
 });
 
 // Visibilidad individual de cada capa.

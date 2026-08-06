@@ -19,10 +19,12 @@ const ATM_CREPUSCULO = new THREE.Color(0xbc490b);
 const ATM_VERTEX = /* glsl */ `
   varying vec3 vNormalW;
   varying vec3 vViewDir;
+  varying vec3 vPosW;
   void main() {
     vec4 wp = modelMatrix * vec4(position, 1.0);
     vNormalW = normalize(mat3(modelMatrix) * normal);
     vViewDir = normalize(cameraPosition - wp.xyz);
+    vPosW = wp.xyz;
     gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `;
@@ -31,9 +33,19 @@ const ATM_FRAGMENT = /* glsl */ `
   uniform vec3 uSunDir;
   uniform vec3 uDayColor;
   uniform vec3 uTwilightColor;
+  uniform vec4 uClipPlanes[3];
+  uniform float uClipActivo;
   varying vec3 vNormalW;
   varying vec3 vViewDir;
+  varying vec3 vPosW;
   void main() {
+    if (uClipActivo > 0.5) {
+      bool fueraDeTodos = true;
+      for (int i = 0; i < 3; i++) {
+        if (dot(uClipPlanes[i].xyz, vPosW) + uClipPlanes[i].w >= 0.0) fueraDeTodos = false;
+      }
+      if (fueraDeTodos) discard;
+    }
     float fresnel = 1.0 - abs(dot(normalize(vNormalW), normalize(vViewDir)));
     float sunOrient = dot(normalize(vNormalW), normalize(uSunDir));
     vec3 atmosColor = mix(uTwilightColor, uDayColor, smoothstep(-0.25, 0.75, sunOrient));
@@ -44,11 +56,14 @@ const ATM_FRAGMENT = /* glsl */ `
 `;
 const CLOUDS_VERTEX = /* glsl */ `
   varying vec3 vNormalW;
+  varying vec3 vPosW;
   varying vec2 vUv;
   void main() {
+    vec4 wp = modelMatrix * vec4(position, 1.0);
     vNormalW = normalize(mat3(modelMatrix) * normal);
+    vPosW = wp.xyz;
     vUv = uv;
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * viewMatrix * wp;
   }
 `;
 
@@ -58,9 +73,19 @@ const CLOUDS_FRAGMENT = /* glsl */ `
   uniform float uCloudBlend;
   uniform vec3 uSunDir;
   uniform float uModo;
+  uniform vec4 uClipPlanes[3];
+  uniform float uClipActivo;
   varying vec3 vNormalW;
+  varying vec3 vPosW;
   varying vec2 vUv;
   void main() {
+    if (uClipActivo > 0.5) {
+      bool fueraDeTodos = true;
+      for (int i = 0; i < 3; i++) {
+        if (dot(uClipPlanes[i].xyz, vPosW) + uClipPlanes[i].w >= 0.0) fueraDeTodos = false;
+      }
+      if (fueraDeTodos) discard;
+    }
     vec3 n = normalize(vNormalW);
     float sunOrient = dot(n, normalize(uSunDir));
     float day = mix(smoothstep(-0.15, 0.35, sunOrient), 1.0, step(0.5, uModo));
@@ -178,6 +203,8 @@ export function createBase(scene, opts = {}) {
           uSunDir: { value: new THREE.Vector3(1, 0, 0) },
           uDayColor: { value: ATM_DIA.clone() },
           uTwilightColor: { value: ATM_CREPUSCULO.clone() },
+          uClipPlanes: { value: [new THREE.Vector4(), new THREE.Vector4(), new THREE.Vector4()] },
+          uClipActivo: { value: 0.0 },
         },
         vertexShader: ATM_VERTEX,
         fragmentShader: ATM_FRAGMENT,
@@ -405,6 +432,8 @@ varying vec3 vPosW;
       uCloudBlend: { value: 0.0 },
       uSunDir: { value: uniformsRef.uSunDir.value.clone() },
       uModo: uniformsRef.uModo,
+      uClipPlanes: { value: [new THREE.Vector4(), new THREE.Vector4(), new THREE.Vector4()] },
+      uClipActivo: { value: 0.0 },
     },
     vertexShader: CLOUDS_VERTEX,
     fragmentShader: CLOUDS_FRAGMENT,
@@ -436,6 +465,8 @@ varying vec3 vPosW;
           uSunDir: { value: uniformsRef.uSunDir.value.clone() },
           uDayColor: { value: ATM_DIA.clone() },
           uTwilightColor: { value: ATM_CREPUSCULO.clone() },
+          uClipPlanes: { value: [new THREE.Vector4(), new THREE.Vector4(), new THREE.Vector4()] },
+          uClipActivo: { value: 0.0 },
         },
         vertexShader: ATM_VERTEX,
         fragmentShader: ATM_FRAGMENT,
@@ -443,7 +474,7 @@ varying vec3 vPosW;
     );
     atmosferaMesh.scale.setScalar(1.04);
     atmosferaMesh.renderOrder = 2;
-    tierra.add(atmosferaMesh);
+    tierraSpin.add(atmosferaMesh);
   }
 
   const sim = { dias: 0 };

@@ -1,8 +1,16 @@
 import * as THREE from "three";
-// ===== Capas internas de la Tierra (recorte por plano de corte) =====
-// La superficie texturizada y las esferas concéntricas se recortan con el
-// MISMO plano de clipping: la Tierra con mares y continentes se "parte por
-// la mitad" y las capas internas quedan visibles por dentro del corte.
+
+// ===== Capas internas de la Tierra (tajada de pastel con clipIntersection) =====
+// Técnica del ejemplo oficial de three.js "webgl_clipping_intersection":
+// tres planos ortogonales recortan una cuña ("tajada") de la esfera y dejan
+// visible el resto (7/8 de la superficie). Por la tajada se ven las capas
+// internas como rodajas macizas 3D, bien desde cualquier ángulo.
+//
+// Con clipIntersection=true se conserva la UNIÓN de los half-spaces positivos:
+// dot(normal, p) + const >= 0. El hueco es la intersección de los half-spaces
+// negativos: x<0 AND y<0 AND z<0, que es justo la dirección de la cámara
+// inicial de tierra-capas ([1.4, 0.9, 2.6]).
+//
 // Radios reales (fracción del radio terrestre 6371 km):
 //   núcleo interno 1221 km (0.19), núcleo externo 3480 km (0.55),
 //   manto 6340 km (0.995), corteza 6371 km (1.0). La corteza se exagera
@@ -11,17 +19,19 @@ import * as THREE from "three";
 const CAPAS = [
   { id: "nucleo-interno", nombre: "Núcleo interno", radio: 0.19, color: 0xffd777 },
   { id: "nucleo-externo", nombre: "Núcleo externo", radio: 0.55, color: 0xe8943a },
-  { id: "manto", nombre: "Manto", radio: 0.95, color: 0x9a5a35 },
+  { id: "manto", nombre: "Manto", radio: 0.93, color: 0x9a5a35 },
   { id: "corteza", nombre: "Corteza", radio: 0.995, color: 0x3f9d78 },
 ];
 
 export function crearCapasTierra(contenedor, opts = {}) {
-  const { radio = 1.2, normal = new THREE.Vector3(1, 0, 0), corte = 0 } = opts;
+  const { radio = 1.2, corte = 0 } = opts;
 
-  // Un solo plano de corte (sagital). Con clipIntersection se conserva la
-  // porción de la esfera que está "detrás" del plano; el resto desaparece y
-  // deja ver el interior. El plano se aplica a superficie y capas por igual.
-  const planos = [new THREE.Plane(normal.clone().normalize(), corte)];
+  // Tres planos ortogonales con el hueco hacia la cámara inicial.
+  const planos = [
+    new THREE.Plane(new THREE.Vector3(1, 0, 0), corte),
+    new THREE.Plane(new THREE.Vector3(0, 1, 0), corte),
+    new THREE.Plane(new THREE.Vector3(0, 0, 1), corte),
+  ];
 
   const grupo = new THREE.Group();
   const meshes = {};
@@ -64,9 +74,23 @@ export function crearCapasTierra(contenedor, opts = {}) {
   };
 }
 
-// Aplica el recorte a un material exterior (superficie, nubes) usando los
+// Aplica el recorte a un material (superficie, nubes, atmósfera) usando los
 // mismos planos de las capas: la Tierra texturizada se "abre" sin ocultarse.
+// Los ShaderMaterial custom (nubes, atmósfera) no pasan por el pipeline de
+// clipping de three.js: reciben los planos como uniforms y recortan en el
+// fragment shader con el mismo criterio de clipIntersection.
 export function aplicarClipping(material, planos, activa) {
+  if (material.uniforms && material.uniforms.uClipPlanes && material.uniforms.uClipActivo) {
+    if (activa) {
+      planos.forEach((p, i) => {
+        material.uniforms.uClipPlanes.value[i].set(p.normal.x, p.normal.y, p.normal.z, p.constant);
+      });
+      material.uniforms.uClipActivo.value = 1.0;
+    } else {
+      material.uniforms.uClipActivo.value = 0.0;
+    }
+    return;
+  }
   if (activa) {
     material.clippingPlanes = planos;
     material.clipIntersection = true;
